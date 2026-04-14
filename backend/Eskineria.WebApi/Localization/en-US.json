@@ -456,5 +456,14 @@
     "maintenance.stay_tuned": "Stay tuned.",
     "maintenance.returning_soon": "We are returning right now...",
     "common.refresh": "Refresh Page",
-    "SmtpDeliveryFailedError": "Email delivery failed. Please check your system settings and internet connection."
+    "SmtpDeliveryFailedError": "Email delivery failed. Please check your system settings and internet connection.",
+    "WelcomeEmailGetStartedText": "To get started, you can go to your dashboard and begin exploring.",
+    "GoToDashboardButton": "Go to Dashboard",
+    "AccountLockedEmailTitle": "Account Security Alert",
+    "AccountLockedEmailContent": "Your account has been temporarily locked due to multiple failed sign-in attempts for your security.",
+    "SecurityAlertLabel": "Security Alert",
+    "AccountLockedReasonText": "Your account has been locked for {0} minutes.",
+    "AccountLockedActionText": "If this was not you, we recommend resetting your password to secure your account.",
+    "AccountLockedEmailSubject": "Your account has been locked",
+    "AccountLockedEmailFallback": "Your account has been locked for {0} minutes."
 }

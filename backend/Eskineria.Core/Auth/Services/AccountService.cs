@@ -148,6 +148,13 @@ public class AccountService : IAccountService
         await _userManager.UpdateAsync(user);
         await _tokenService.RevokeUserRefreshTokensAsync(user.Id);
         await TrySendPasswordChangedNotificationAsync(user, GetCurrentIpAddress(), GetCurrentUserAgent());
+        
+        // Also send welcome email if not sent yet and user is now fully verified
+        if (user.EmailConfirmed)
+        {
+            await TrySendWelcomeEmailAsync(user);
+        }
+
         return new AuthResponse { Success = true, Message = _localizer["PasswordResetSuccessful"] };
     }
 
@@ -479,15 +486,29 @@ public class AccountService : IAccountService
             throw new InvalidOperationException("Could not persist password reset code for the user.");
         }
 
+        var occurredAtUtc = DateTime.UtcNow;
+        var eventDateTime = FormatEventDateTime(occurredAtUtc);
+        var resolvedLocation = ResolveLocation(GetCurrentIpAddress());
+        var resolvedDevice = ResolveDevice(GetCurrentUserAgent());
+
         var templateModel = new
         {
-            VerificationCodeEmailTitle = _localizer["PasswordResetCodeEmailTitle"].Value,
+            ResetPasswordEmailTitle = _localizer["ResetPasswordEmailTitle"].Value,
             Greeting = _localizer["EmailGreeting", user.FirstName ?? string.Empty].Value,
-            VerificationCodeEmailContent = _localizer["PasswordResetCodeEmailContent"].Value,
+            ResetPasswordEmailContent = _localizer["PasswordResetCodeEmailContent"].Value,
             VerificationCodeLabel = _localizer["VerificationCodeLabel"].Value,
             VerificationCode = verificationCode,
+            ResetPasswordLink = GetResetPasswordUrl(user.Email, verificationCode),
+            ResetPasswordButton = _localizer["ResetPasswordButton"].Value,
+            SecurityAlertLabel = _localizer["SecurityAlertLabel"].Value,
+            SecurityEventTimeLabel = _localizer["SecurityEventTimeLabel"].Value,
+            SecurityEventLocationLabel = _localizer["SecurityEventLocationLabel"].Value,
+            SecurityEventDeviceLabel = _localizer["SecurityEventDeviceLabel"].Value,
+            EventDateTime = eventDateTime,
+            LoginLocation = resolvedLocation,
+            DeviceInfo = resolvedDevice,
             EmailSecurityNote = _localizer["EmailSecurityNote"].Value,
-            VerificationCodeEmailExpiry = _localizer["PasswordResetCodeEmailExpiry", runtimeSettings.EmailVerificationCodeExpirySeconds].Value,
+            ResetPasswordEmailExpiry = _localizer["PasswordResetCodeEmailExpiry", (int)runtimeSettings.EmailVerificationCodeExpirySeconds].Value,
             EmailTeam = _localizer["EmailTeam"].Value,
             EmailFooterIgnore = _localizer["EmailFooterIgnore"].Value,
             IsResend = isResend
@@ -495,7 +516,7 @@ public class AccountService : IAccountService
 
         var fallbackSubject = _localizer["PasswordResetEmailSubject"].Value;
         var fallbackBody = _localizer["PasswordResetCodeFallback", verificationCode, runtimeSettings.EmailVerificationCodeExpirySeconds].Value;
-        var loadedTemplate = await _emailTemplateHelper.LoadTemplateAsync("VerifyEmailCode", "VerifyEmailCode", user.Email);
+        var loadedTemplate = await _emailTemplateHelper.LoadTemplateAsync("ResetPassword", "ResetPassword", user.Email);
         var emailSubject = await _emailTemplateHelper.RenderSubjectAsync(loadedTemplate.Subject, templateModel, fallbackSubject);
         var emailBody = await _emailTemplateHelper.RenderBodyAsync(loadedTemplate.Body, templateModel, fallbackBody);
 
@@ -729,6 +750,90 @@ public class AccountService : IAccountService
             // Security notifications should not block successful auth flows.
         }
     }
+
+    public async Task TrySendWelcomeEmailAsync(EskineriaUser user)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(user.Email)) return;
+
+            var templateModel = new
+            {
+                WelcomeEmailTitle = _localizer["WelcomeEmailTitle"].Value,
+                Greeting = _localizer["EmailGreeting", user.FirstName ?? string.Empty].Value,
+                WelcomeEmailContent = _localizer["WelcomeEmailContent"].Value,
+                WelcomeEmailGetStartedText = _localizer["WelcomeEmailGetStartedText"].Value,
+                DashboardLink = GetDashboardUrl(),
+                GoToDashboardButton = _localizer["GoToDashboardButton"].Value,
+                EmailTeam = _localizer["EmailTeam"].Value,
+                EmailFooterIgnore = _localizer["EmailFooterIgnore"].Value
+            };
+
+            var fallbackSubject = _localizer["WelcomeEmailSubject"].Value;
+            var fallbackBody = _localizer["WelcomeEmailFallback", user.FirstName ?? "User"].Value;
+
+            var loadedTemplate = await _emailTemplateHelper.LoadTemplateAsync("Welcome", "Welcome", user.Email);
+            var emailSubject = await _emailTemplateHelper.RenderSubjectAsync(loadedTemplate.Subject, templateModel, fallbackSubject);
+            var emailBody = await _emailTemplateHelper.RenderBodyAsync(loadedTemplate.Body, templateModel, fallbackBody);
+
+            await _notificationService.SendAsync(new NotificationMessage
+            {
+                Recipient = user.Email,
+                Title = emailSubject,
+                Body = emailBody,
+                Channel = NotificationChannel.Email
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to send welcome email to {user.Email}: {ex.Message}");
+        }
+    }
+
+    public async Task TrySendAccountLockedNotificationAsync(EskineriaUser user, int lockoutMinutes)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(user.Email)) return;
+
+            var templateModel = new
+            {
+                AccountLockedEmailTitle = _localizer["AccountLockedEmailTitle"].Value,
+                Greeting = _localizer["EmailGreeting", user.FirstName ?? string.Empty].Value,
+                AccountLockedEmailContent = _localizer["AccountLockedEmailContent"].Value,
+                SecurityAlertLabel = _localizer["SecurityAlertLabel"].Value,
+                AccountLockedReasonText = _localizer["AccountLockedReasonText", lockoutMinutes].Value,
+                AccountLockedActionText = _localizer["AccountLockedActionText"].Value,
+                ForgotPasswordLink = GetForgotPasswordUrl(),
+                ResetPasswordButton = _localizer["ResetPasswordButton"].Value,
+                EmailTeam = _localizer["EmailTeam"].Value,
+                EmailFooterIgnore = _localizer["EmailFooterIgnore"].Value
+            };
+
+            var fallbackSubject = _localizer["AccountLockedEmailSubject"].Value;
+            var fallbackBody = _localizer["AccountLockedEmailFallback", lockoutMinutes].Value;
+
+            var loadedTemplate = await _emailTemplateHelper.LoadTemplateAsync("AccountLocked", "AccountLocked", user.Email);
+            var emailSubject = await _emailTemplateHelper.RenderSubjectAsync(loadedTemplate.Subject, templateModel, fallbackSubject);
+            var emailBody = await _emailTemplateHelper.RenderBodyAsync(loadedTemplate.Body, templateModel, fallbackBody);
+
+            await _notificationService.SendAsync(new NotificationMessage
+            {
+                Recipient = user.Email,
+                Title = emailSubject,
+                Body = emailBody,
+                Channel = NotificationChannel.Email
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to send account locked notification to {user.Email}: {ex.Message}");
+        }
+    }
+
+    private string GetDashboardUrl() => $"{_configuration["FrontendUrl"] ?? "http://localhost:5173"}/dashboard";
+    private string GetForgotPasswordUrl() => $"{_configuration["FrontendUrl"] ?? "http://localhost:5173"}/auth/forgot-password";
+    private string GetResetPasswordUrl(string email, string code) => $"{_configuration["FrontendUrl"] ?? "http://localhost:5173"}/auth/reset-password?email={Uri.EscapeDataString(email)}&code={Uri.EscapeDataString(code)}";
 
     private string FormatEventDateTime(DateTime occurredAtUtc)
     {

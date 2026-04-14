@@ -19,4 +19,6 @@ public interface IAccountService
     Task<AuthResponse<MfaStatusDto>> GetMfaStatusAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default);
     Task SendLoginNotificationAsync(Guid userId, string? ipAddress, string? userAgent);
     Task<AuthResponse> SendMfaActionCodeAsync(ClaimsPrincipal user, bool targetState);
+    Task TrySendWelcomeEmailAsync(Core.Auth.Entities.EskineriaUser user);
+    Task TrySendAccountLockedNotificationAsync(Core.Auth.Entities.EskineriaUser user, int lockoutMinutes);
 }

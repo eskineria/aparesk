@@ -43,7 +43,8 @@ public sealed class EmailTemplateSeedService
             ["PasswordChangedAlert"] = "{{ PasswordChangedAlertEmailTitle }}",
             ["LoginAlert"] = "{{ LoginAlertEmailTitle }}",
             ["MfaActionCode"] = "{{ MfaActionEmailSubject }}",
-            ["MfaLoginCode"] = "{{ MfaVerificationEmailTitle }}"
+            ["MfaLoginCode"] = "{{ MfaVerificationEmailTitle }}",
+            ["AccountLocked"] = "{{ AccountLockedEmailTitle }}"
         };
 
         var legacySubjectsByKey = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
@@ -54,7 +55,8 @@ public sealed class EmailTemplateSeedService
             ["PasswordChangedAlert"] = new(StringComparer.OrdinalIgnoreCase) { "Your password was changed", "Şifreniz değiştirildi" },
             ["LoginAlert"] = new(StringComparer.OrdinalIgnoreCase) { "New login detected", "Yeni giriş tespit edildi" },
             ["MfaActionCode"] = new(StringComparer.OrdinalIgnoreCase) { "MFA Action Verification Code", "MFA İşlem Doğrulama Kodu" },
-            ["MfaLoginCode"] = new(StringComparer.OrdinalIgnoreCase) { "Your MFA verification code", "MFA doğrulama kodunuz" }
+            ["MfaLoginCode"] = new(StringComparer.OrdinalIgnoreCase) { "Your MFA verification code", "MFA doğrulama kodunuz" },
+            ["AccountLocked"] = new(StringComparer.OrdinalIgnoreCase) { "Account Locked", "Hesabınız Kilitlendi" }
         };
 
         var defaultTemplateKeys = subjectPlaceholderByKey.Keys.ToList();
@@ -204,13 +206,15 @@ public sealed class EmailTemplateSeedService
             new("LoginAlert", "en-US", "Login Alert", "{{ LoginAlertEmailTitle }}", "LoginAlert.sbn"),
             new("MfaActionCode", "en-US", "MFA Action Code", "{{ MfaActionEmailSubject }}", "MfaActionCode.sbn"),
             new("MfaLoginCode", "en-US", "MFA Login Code", "{{ MfaVerificationEmailTitle }}", "MfaLoginCode.sbn"),
+            new("AccountLocked", "en-US", "Account Locked", "{{ AccountLockedEmailTitle }}", "AccountLocked.sbn"),
             new("VerifyEmailCode", "tr-TR", "E-posta Doğrulama Kodu", "{{ VerificationCodeEmailTitle }}", "VerifyEmailCode.sbn"),
             new("ResetPassword", "tr-TR", "Şifre Sıfırlama", "{{ ResetPasswordEmailTitle }}", "ResetPassword.sbn"),
             new("Welcome", "tr-TR", "Hoş Geldiniz E-postası", "{{ WelcomeEmailTitle }}", "Welcome.sbn"),
             new("PasswordChangedAlert", "tr-TR", "Şifre Değişikliği Uyarısı", "{{ PasswordChangedAlertEmailTitle }}", "PasswordChangedAlert.sbn"),
             new("LoginAlert", "tr-TR", "Giriş Uyarısı", "{{ LoginAlertEmailTitle }}", "LoginAlert.sbn"),
             new("MfaActionCode", "tr-TR", "MFA İşlem Kodu", "{{ MfaActionEmailSubject }}", "MfaActionCode.sbn"),
-            new("MfaLoginCode", "tr-TR", "MFA Giriş Kodu", "{{ MfaVerificationEmailTitle }}", "MfaLoginCode.sbn")
+            new("MfaLoginCode", "tr-TR", "MFA Giriş Kodu", "{{ MfaVerificationEmailTitle }}", "MfaLoginCode.sbn"),
+            new("AccountLocked", "tr-TR", "Hesap Kilitlendi", "{{ AccountLockedEmailTitle }}", "AccountLocked.sbn")
         ];
     }
 }

@@ -456,5 +456,14 @@
     "maintenance.stay_tuned": "Bizi takip etmeye devam edin.",
     "maintenance.returning_soon": "Sizlerle tekrar buluşmamıza çok az kaldı...",
     "common.refresh": "Sayfayı Yenile",
-    "SmtpDeliveryFailedError": "E-posta gönderimi başarısız oldu. Lütfen sistem ayarlarını ve internet bağlantısını kontrol edin."
+    "SmtpDeliveryFailedError": "E-posta gönderimi başarısız oldu. Lütfen sistem ayarlarını ve internet bağlantısını kontrol edin.",
+    "WelcomeEmailGetStartedText": "Başlamak için panelinize gidip hemen keşfetmeye başlayabilirsiniz.",
+    "GoToDashboardButton": "Panele Git",
+    "AccountLockedEmailTitle": "Hesap Güvenlik Uyarısı",
+    "AccountLockedEmailContent": "Hesabınızda çok fazla hatalı giriş denemesi yapıldığı için güvenliğiniz amacıyla hesabınız geçici olarak kilitlendi.",
+    "SecurityAlertLabel": "Güvenlik Uyarısı",
+    "AccountLockedReasonText": "Hesabınız {0} dakika boyunca kilitlenmiştir.",
+    "AccountLockedActionText": "Eğer bu denemeleri siz yapmadıysanız, hesabınızı güvenceye almak için şifrenizi sıfırlamanızı öneririz.",
+    "AccountLockedEmailSubject": "Hesabınız kilitlendi",
+    "AccountLockedEmailFallback": "Hesabınız {0} dakika boyunca kilitlendi."
 }

@@ -41,6 +41,7 @@ public class AuthService : IAuthService
     private readonly IConfiguration _configuration;
     private readonly IStringLocalizer<AuthService> _localizer;
     private readonly IRoleSelectionAuditStore _roleSelectionAuditStore;
+    private readonly IAccountService _accountService;
 
     public AuthService(
         UserManager<EskineriaUser> userManager,
@@ -51,7 +52,8 @@ public class AuthService : IAuthService
         AuthEmailTemplateHelper emailTemplateHelper,
         IConfiguration configuration,
         IStringLocalizer<AuthService> localizer,
-        IRoleSelectionAuditStore roleSelectionAuditStore)
+        IRoleSelectionAuditStore roleSelectionAuditStore,
+        IAccountService accountService)
     {
         _userManager = userManager;
         _roleManager = roleManager;
@@ -62,6 +64,7 @@ public class AuthService : IAuthService
         _configuration = configuration;
         _localizer = localizer;
         _roleSelectionAuditStore = roleSelectionAuditStore;
+        _accountService = accountService;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, AuthRuntimeSettings runtimeSettings)
@@ -193,6 +196,9 @@ public class AuthService : IAuthService
             };
         }
 
+        // Send welcome email immediately if verification is not required
+        await _accountService.TrySendWelcomeEmailAsync(newUser);
+
         var tokenResponse = await _tokenService.GenerateTokensAsync(
             newUser,
             normalizedSettings.SessionAccessTokenLifetimeMinutes,
@@ -270,6 +276,9 @@ public class AuthService : IAuthService
         }
 
         await _userManager.UpdateSecurityStampAsync(user);
+
+        // Send welcome email after successful verification
+        await _accountService.TrySendWelcomeEmailAsync(user);
 
         return new AuthResponse { Success = true, Message = _localizer["EmailConfirmedSuccessfully"] };
     }
@@ -378,6 +387,7 @@ public class AuthService : IAuthService
 
         if (result.IsLockedOut)
         {
+            await _accountService.TrySendAccountLockedNotificationAsync(user, (int)(normalizedSettings.LoginLockoutDurationMinutes));
             return new AuthResponse { Success = false, Message = _localizer["user_locked_out"] };
         }
 
@@ -436,6 +446,7 @@ public class AuthService : IAuthService
                     await _userManager.AccessFailedAsync(user);
                     if (await _userManager.IsLockedOutAsync(user))
                     {
+                        await _accountService.TrySendAccountLockedNotificationAsync(user, (int)(normalizedSettings.LoginLockoutDurationMinutes));
                         return new AuthResponse
                         {
                             Success = false,
