@@ -200,7 +200,19 @@ const Index = () => {
   };
 
   const handleVerificationCodeChange = (index: number, value: string) => {
-    const nextDigit = value.replace(/\D/g, '').slice(-1);
+    const currentDigit = verificationCodeDigits[index]
+    const newVal = value.replace(/\D/g, '')
+
+    let nextDigit = ''
+    if (newVal.length > 1 && currentDigit) {
+      if (newVal[0] === currentDigit) {
+        nextDigit = newVal[1]
+      } else {
+        nextDigit = newVal[0]
+      }
+    } else {
+      nextDigit = newVal.slice(-1)
+    }
 
     setVerificationCodeDigits((prev) => {
       const next = [...prev];
@@ -442,6 +454,7 @@ const Index = () => {
                           onKeyDown={(event) => handleVerificationCodeKeyDown(index, event)}
                           onPaste={handleVerificationCodePaste}
                           onFocus={(event) => event.currentTarget.select()}
+                          onClick={(event) => event.currentTarget.select()}
                           disabled={verificationExpiresIn <= 0 || isVerifyingCode || isResendingCode}
                           ref={(input) => {
                             verificationCodeInputRefs.current[index] = input;

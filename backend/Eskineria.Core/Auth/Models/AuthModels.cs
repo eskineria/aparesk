@@ -37,7 +37,7 @@ public class AuthRuntimeSettings
     public bool PasswordRequireLowercase { get; set; } = true;
     public bool PasswordRequireDigit { get; set; } = true;
     public bool PasswordRequireNonAlphanumeric { get; set; }
-    public bool MfaEnforceForAdmins { get; set; }
+    public bool MfaEnforcedForAll { get; set; }
     public int MfaTrustedDeviceDurationDays { get; set; } = 30;
     public string MfaBypassIpWhitelist { get; set; } = string.Empty;
     public bool RegistrationInvitationRequired { get; set; }

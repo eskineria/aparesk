@@ -23,7 +23,8 @@ public static class SystemSettingKeys
     public const string AuthPasswordPolicyRequireLowercase = "Auth.PasswordPolicy.RequireLowercase";
     public const string AuthPasswordPolicyRequireDigit = "Auth.PasswordPolicy.RequireDigit";
     public const string AuthPasswordPolicyRequireNonAlphanumeric = "Auth.PasswordPolicy.RequireNonAlphanumeric";
-    public const string AuthMfaEnforceForAdmins = "Auth.Mfa.EnforceForAdmins";
+    public const string AuthMfaEnabled = "Auth.Mfa.Enabled";
+    public const string AuthMfaEnforcedForAll = "Auth.Mfa.EnforcedForAll";
     public const string AuthMfaTrustedDeviceDurationDays = "Auth.Mfa.TrustedDeviceDurationDays";
     public const string AuthMfaBypassIpWhitelist = "Auth.Mfa.BypassIpWhitelist";
     public const string AuthRegistrationInvitationRequired = "Auth.Registration.InvitationRequired";

@@ -67,6 +67,7 @@ public class UserInfoDto
 public class MfaStatusDto
 {
     public bool Enabled { get; set; }
+    public bool FeatureEnabled { get; set; }
 }
 
 public class UpdateMfaRequest

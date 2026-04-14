@@ -144,7 +144,8 @@ public class SystemSettingsService : ISystemSettingsService
             [SystemSettingKeys.AuthPasswordPolicyRequireLowercase] = bool.TrueString.ToLowerInvariant(),
             [SystemSettingKeys.AuthPasswordPolicyRequireDigit] = bool.TrueString.ToLowerInvariant(),
             [SystemSettingKeys.AuthPasswordPolicyRequireNonAlphanumeric] = bool.FalseString.ToLowerInvariant(),
-            [SystemSettingKeys.AuthMfaEnforceForAdmins] = bool.FalseString.ToLowerInvariant(),
+            [SystemSettingKeys.AuthMfaEnabled] = bool.TrueString.ToLowerInvariant(),
+            [SystemSettingKeys.AuthMfaEnforcedForAll] = bool.TrueString.ToLowerInvariant(),
             [SystemSettingKeys.AuthMfaTrustedDeviceDurationDays] = DefaultMfaTrustedDeviceDurationDays.ToString(),
             [SystemSettingKeys.AuthMfaBypassIpWhitelist] = string.Empty,
             [SystemSettingKeys.AuthRegistrationInvitationRequired] = bool.FalseString.ToLowerInvariant(),
@@ -267,7 +268,8 @@ public class SystemSettingsService : ISystemSettingsService
             PasswordRequireLowercase = GetBooleanSettingValue(settingsMap, SystemSettingKeys.AuthPasswordPolicyRequireLowercase),
             PasswordRequireDigit = GetBooleanSettingValue(settingsMap, SystemSettingKeys.AuthPasswordPolicyRequireDigit),
             PasswordRequireNonAlphanumeric = GetBooleanSettingValue(settingsMap, SystemSettingKeys.AuthPasswordPolicyRequireNonAlphanumeric),
-            MfaEnforceForAdmins = GetBooleanSettingValue(settingsMap, SystemSettingKeys.AuthMfaEnforceForAdmins),
+            MfaFeatureEnabled = GetBooleanSettingValue(settingsMap, SystemSettingKeys.AuthMfaEnabled),
+            MfaEnforcedForAll = GetBooleanSettingValue(settingsMap, SystemSettingKeys.AuthMfaEnforcedForAll),
             MfaTrustedDeviceDurationDays = GetIntSettingValue(
                 settingsMap,
                 SystemSettingKeys.AuthMfaTrustedDeviceDurationDays,
@@ -448,7 +450,8 @@ public class SystemSettingsService : ISystemSettingsService
         UpsertBooleanSetting(existingSettings, SystemSettingKeys.AuthPasswordPolicyRequireLowercase, request.PasswordRequireLowercase);
         UpsertBooleanSetting(existingSettings, SystemSettingKeys.AuthPasswordPolicyRequireDigit, request.PasswordRequireDigit);
         UpsertBooleanSetting(existingSettings, SystemSettingKeys.AuthPasswordPolicyRequireNonAlphanumeric, request.PasswordRequireNonAlphanumeric);
-        UpsertBooleanSetting(existingSettings, SystemSettingKeys.AuthMfaEnforceForAdmins, request.MfaEnforceForAdmins);
+        UpsertBooleanSetting(existingSettings, SystemSettingKeys.AuthMfaEnabled, request.MfaFeatureEnabled);
+        UpsertBooleanSetting(existingSettings, SystemSettingKeys.AuthMfaEnforcedForAll, request.MfaEnforcedForAll);
         UpsertIntSetting(existingSettings, SystemSettingKeys.AuthMfaTrustedDeviceDurationDays, mfaTrustedDeviceDurationDays);
         UpsertStringSetting(existingSettings, SystemSettingKeys.AuthMfaBypassIpWhitelist, mfaBypassIpWhitelist);
         UpsertBooleanSetting(existingSettings, SystemSettingKeys.AuthRegistrationInvitationRequired, request.RegistrationInvitationRequired);
@@ -666,6 +669,11 @@ public class SystemSettingsService : ISystemSettingsService
     public Task<bool> IsNotificationLoginAlertEnabledAsync()
     {
         return GetBooleanSettingValueAsync(SystemSettingKeys.SystemNotificationsLoginAlertEnabled);
+    }
+    
+    public Task<bool> IsMfaEnabledAsync()
+    {
+        return GetBooleanSettingValueAsync(SystemSettingKeys.AuthMfaEnabled);
     }
 
     public Task<bool> IsMaintenanceModeEnabledAsync()

@@ -126,9 +126,15 @@ const ComplianceTerms = () => {
     }, [terms])
 
     const filteredTerms = useMemo(() => {
-        const items = filterType === 'All'
-            ? terms
-            : terms.filter((item) => item.type === filterType)
+        let items = terms
+
+        if (!canManage) {
+            items = items.filter((item) => item.isActive)
+        }
+
+        if (filterType !== 'All') {
+            items = items.filter((item) => item.type === filterType)
+        }
 
         return [...items].sort((left, right) => {
             if (left.type !== right.type) {
@@ -139,7 +145,7 @@ const ComplianceTerms = () => {
             const rightDate = new Date(right.effectiveDate).getTime()
             return rightDate - leftDate
         })
-    }, [filterType, terms])
+    }, [canManage, filterType, terms])
 
     const editingTerm = useMemo(
         () => terms.find((item) => item.id === editingId) ?? null,
@@ -318,7 +324,7 @@ const ComplianceTerms = () => {
             <PageBreadcrumb title={tt('identity.compliance_terms.title', 'Compliance Terms')} subtitle={t('identity.title')} />
             <Container fluid>
                 <Row className="g-3">
-                    <Col xl={7}>
+                    <Col xl={canManage ? 7 : 12}>
                         <Card className="mb-3">
                             <Card.Body>
                                 <div className="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
@@ -485,43 +491,36 @@ const ComplianceTerms = () => {
                         </Card>
                     </Col>
 
-                    <Col xl={5}>
-                        <Card className="mb-3">
-                            <Card.Body>
-                                <div className="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-                                    <div>
-                                        <h5 className="mb-1">
-                                            {editingTerm
-                                                ? tt('identity.compliance_terms.form_edit_title', 'Edit version')
-                                                : tt('identity.compliance_terms.form_create_title', 'Create version')}
-                                        </h5>
-                                        <p className="text-muted mb-0">
-                                            {editingTerm
-                                                ? tt(
-                                                    'identity.compliance_terms.form_edit_subtitle',
-                                                    'Content, summary and active state can be updated for existing versions.',
-                                                )
-                                                : tt(
-                                                    'identity.compliance_terms.form_create_subtitle',
-                                                    'Create a new legal document version and optionally activate it immediately.',
-                                                )}
-                                        </p>
+                    {canManage && (
+                        <Col xl={5}>
+                            <Card className="mb-3">
+                                <Card.Body>
+                                    <div className="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                                        <div>
+                                            <h5 className="mb-1">
+                                                {editingTerm
+                                                    ? tt('identity.compliance_terms.form_edit_title', 'Edit version')
+                                                    : tt('identity.compliance_terms.form_create_title', 'Create version')}
+                                            </h5>
+                                            <p className="text-muted mb-0">
+                                                {editingTerm
+                                                    ? tt(
+                                                        'identity.compliance_terms.form_edit_subtitle',
+                                                        'Content, summary and active state can be updated for existing versions.',
+                                                    )
+                                                    : tt(
+                                                        'identity.compliance_terms.form_create_subtitle',
+                                                        'Create a new legal document version and optionally activate it immediately.',
+                                                    )}
+                                            </p>
+                                        </div>
+                                        {editingTerm ? (
+                                            <Button variant="light" onClick={resetForm}>
+                                                {tt('identity.compliance_terms.cancel_edit', 'Cancel edit')}
+                                            </Button>
+                                        ) : null}
                                     </div>
-                                    {editingTerm ? (
-                                        <Button variant="light" onClick={resetForm}>
-                                            {tt('identity.compliance_terms.cancel_edit', 'Cancel edit')}
-                                        </Button>
-                                    ) : null}
-                                </div>
 
-                                {!canManage ? (
-                                    <Alert variant="light" className="border mb-0">
-                                        {tt(
-                                            'identity.compliance_terms.form_locked',
-                                            'This form is locked because your account does not have Compliance.Manage permission.',
-                                        )}
-                                    </Alert>
-                                ) : (
                                     <Form>
                                         <Form.Group className="mb-3">
                                             <Form.Label htmlFor="terms-type">{tt('identity.compliance_terms.type', 'Type')}</Form.Label>
@@ -626,10 +625,10 @@ const ComplianceTerms = () => {
                                             ) : null}
                                         </div>
                                     </Form>
-                                )}
-                            </Card.Body>
-                        </Card>
-                    </Col>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    )}
                 </Row>
             </Container>
 

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Eskineria.Core.Settings.Abstractions;
 using Eskineria.Core.Auth.Abstractions;
 using Eskineria.Core.Auth.Entities;
 using Eskineria.Core.Auth.Models;
@@ -28,6 +29,7 @@ public class AccountService : IAccountService
     private readonly AuthEmailTemplateHelper _emailTemplateHelper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IConfiguration _configuration;
+    private readonly ISystemSettingsService _systemSettingsService;
     private readonly IStringLocalizer<AccountService> _localizer;
 
     public AccountService(
@@ -37,6 +39,7 @@ public class AccountService : IAccountService
         AuthEmailTemplateHelper emailTemplateHelper,
         IHttpContextAccessor httpContextAccessor,
         IConfiguration configuration,
+        ISystemSettingsService systemSettingsService,
         IStringLocalizer<AccountService> localizer)
     {
         _userManager = userManager;
@@ -45,6 +48,7 @@ public class AccountService : IAccountService
         _emailTemplateHelper = emailTemplateHelper;
         _httpContextAccessor = httpContextAccessor;
         _configuration = configuration;
+        _systemSettingsService = systemSettingsService;
         _localizer = localizer;
     }
 
@@ -264,7 +268,8 @@ public class AccountService : IAccountService
             Success = true,
             Data = new MfaStatusDto
             {
-                Enabled = user.TwoFactorEnabled
+                Enabled = user.TwoFactorEnabled,
+                FeatureEnabled = await _systemSettingsService.IsMfaEnabledAsync()
             }
         };
     }

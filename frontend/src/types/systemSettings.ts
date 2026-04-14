@@ -20,7 +20,8 @@ export type AuthSystemSettings = {
     passwordRequireLowercase?: boolean
     passwordRequireDigit?: boolean
     passwordRequireNonAlphanumeric?: boolean
-    mfaEnforceForAdmins?: boolean
+    mfaFeatureEnabled?: boolean
+    mfaEnforcedForAll?: boolean
     mfaTrustedDeviceDurationDays?: number
     mfaBypassIpWhitelist?: string
     registrationInvitationRequired?: boolean

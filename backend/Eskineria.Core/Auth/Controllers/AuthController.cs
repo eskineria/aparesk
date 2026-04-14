@@ -840,7 +840,7 @@ public class AuthController : ControllerBase
                 LoginLockoutDurationMinutes = await _systemSettingsService.GetLoginLockoutDurationMinutesAsync(),
                 MaintenanceModeEnabled = await _systemSettingsService.IsMaintenanceModeEnabledAsync(),
                 NotificationLoginAlertEnabled = await _systemSettingsService.IsNotificationLoginAlertEnabledAsync(),
-                MfaFeatureEnabled = true,
+                MfaFeatureEnabled = await _systemSettingsService.IsMfaEnabledAsync(),
                 RequestIpAddress = GetRequestIpAddress() ?? string.Empty,
             };
         }
@@ -864,7 +864,7 @@ public class AuthController : ControllerBase
             PasswordRequireLowercase = settings.PasswordRequireLowercase,
             PasswordRequireDigit = settings.PasswordRequireDigit,
             PasswordRequireNonAlphanumeric = settings.PasswordRequireNonAlphanumeric,
-            MfaEnforceForAdmins = settings.MfaEnforceForAdmins,
+            MfaEnforcedForAll = settings.MfaEnforcedForAll,
             MfaTrustedDeviceDurationDays = settings.MfaTrustedDeviceDurationDays,
             MfaBypassIpWhitelist = settings.MfaBypassIpWhitelist,
             RegistrationInvitationRequired = settings.RegistrationInvitationRequired,
@@ -878,7 +878,7 @@ public class AuthController : ControllerBase
             MaintenanceIpWhitelist = settings.MaintenanceIpWhitelist,
             MaintenanceRoleWhitelist = settings.MaintenanceRoleWhitelist,
             NotificationLoginAlertEnabled = settings.NotificationLoginAlertEnabled,
-            MfaFeatureEnabled = true,
+            MfaFeatureEnabled = settings.MfaFeatureEnabled,
             RequestIpAddress = GetRequestIpAddress() ?? string.Empty,
         };
     }

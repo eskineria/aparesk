@@ -84,6 +84,7 @@ const DEFAULT_SETTINGS: AuthSystemSettings = {
     passwordRequireLowercase: true,
     passwordRequireDigit: true,
     passwordRequireNonAlphanumeric: false,
+    mfaFeatureEnabled: true,
     mfaEnforceForAdmins: false,
     mfaTrustedDeviceDurationDays: 30,
     mfaBypassIpWhitelist: '',
@@ -887,14 +888,23 @@ const SystemSettings = () => {
                                                     <hr />
 
                                                     <Row className="g-3 mb-3 settings-mixed-row">
-                                                        <Col md={4}>
-                                                            <Form.Check
-                                                                type="switch"
-                                                                id="setting-mfa-enforce-for-admins"
-                                                                label={t('identity.system_settings.mfa_enforce_for_admins')}
-                                                                checked={settings.mfaEnforceForAdmins}
-                                                                onChange={(event) => setSettings((prev) => ({ ...prev, mfaEnforceForAdmins: event.target.checked }))}
-                                                            />
+                                                        <Col md={12}>
+                                                            <div className="d-flex flex-column gap-2 mt-2">
+                                                                <Form.Check
+                                                                    type="switch"
+                                                                    id="setting-mfa-feature-enabled"
+                                                                    label={t('identity.system_settings.mfa_feature_enabled')}
+                                                                    checked={settings.mfaFeatureEnabled ?? true}
+                                                                    onChange={(event) => setSettings((prev) => ({ ...prev, mfaFeatureEnabled: event.target.checked }))}
+                                                                />
+                                                                <Form.Check
+                                                                    type="switch"
+                                                                    id="setting-mfa-enforced-for-all"
+                                                                    label={t('identity.system_settings.mfa_enforced_for_all')}
+                                                                    checked={settings.mfaEnforcedForAll}
+                                                                    onChange={(event) => setSettings((prev) => ({ ...prev, mfaEnforcedForAll: event.target.checked }))}
+                                                                />
+                                                            </div>
                                                         </Col>
                                                         <Col md={4}>
                                                             <Form.Label htmlFor="setting-mfa-trusted-device-duration-days">

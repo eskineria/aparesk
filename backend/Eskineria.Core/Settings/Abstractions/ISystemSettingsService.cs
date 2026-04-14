@@ -35,5 +35,6 @@ public interface ISystemSettingsService
     Task<int> GetLoginMaxFailedAttemptsAsync();
     Task<int> GetLoginLockoutDurationMinutesAsync();
     Task<bool> IsNotificationLoginAlertEnabledAsync();
+    Task<bool> IsMfaEnabledAsync();
     Task<bool> IsMaintenanceModeEnabledAsync();
 }

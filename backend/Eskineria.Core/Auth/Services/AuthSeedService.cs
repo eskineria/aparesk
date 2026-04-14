@@ -349,7 +349,7 @@ public sealed class AuthSeedService
         }
         else if (string.Equals(roleName, Permissions.UserRole, StringComparison.OrdinalIgnoreCase))
         {
-            targetPermissions.Add(Permissions.ComplianceRead);
+            // Only dashboard (already added above) and implicitly allowed profile access
         }
         else
         {

@@ -23,7 +23,8 @@ public class AuthSystemSettingsDto
     public bool PasswordRequireLowercase { get; set; }
     public bool PasswordRequireDigit { get; set; }
     public bool PasswordRequireNonAlphanumeric { get; set; }
-    public bool MfaEnforceForAdmins { get; set; }
+    public bool MfaFeatureEnabled { get; set; }
+    public bool MfaEnforcedForAll { get; set; }
     public int MfaTrustedDeviceDurationDays { get; set; }
     public string MfaBypassIpWhitelist { get; set; } = string.Empty;
     public bool RegistrationInvitationRequired { get; set; }
@@ -88,7 +89,8 @@ public class UpdateAuthSystemSettingsRequest
     public bool PasswordRequireLowercase { get; set; }
     public bool PasswordRequireDigit { get; set; }
     public bool PasswordRequireNonAlphanumeric { get; set; }
-    public bool MfaEnforceForAdmins { get; set; }
+    public bool MfaFeatureEnabled { get; set; }
+    public bool MfaEnforcedForAll { get; set; }
     public int MfaTrustedDeviceDurationDays { get; set; }
     public string MfaBypassIpWhitelist { get; set; } = string.Empty;
     public bool RegistrationInvitationRequired { get; set; }

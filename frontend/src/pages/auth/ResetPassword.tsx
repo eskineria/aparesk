@@ -191,7 +191,19 @@ const ResetPassword = () => {
   }, [codeDigits, email])
 
   const handleCodeChange = (index: number, value: string) => {
-    const nextDigit = value.replace(/\D/g, '').slice(-1)
+    const currentDigit = codeDigits[index]
+    const newVal = value.replace(/\D/g, '')
+
+    let nextDigit = ''
+    if (newVal.length > 1 && currentDigit) {
+      if (newVal[0] === currentDigit) {
+        nextDigit = newVal[1]
+      } else {
+        nextDigit = newVal[0]
+      }
+    } else {
+      nextDigit = newVal.slice(-1)
+    }
 
     setCodeDigits((prev) => {
       const next = [...prev]
@@ -470,6 +482,7 @@ const ResetPassword = () => {
                   onKeyDown={(event) => handleCodeKeyDown(index, event)}
                   onPaste={handleCodePaste}
                   onFocus={(event) => event.currentTarget.select()}
+                  onClick={(event) => event.currentTarget.select()}
                   ref={(input) => {
                     codeInputRefs.current[index] = input
                   }}

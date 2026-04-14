@@ -388,12 +388,11 @@ public class AuthService : IAuthService
                 normalizedSettings.RequestIpAddress,
                 normalizedSettings.MfaBypassIpWhitelist);
 
-            var requiresAdminMfa =
+            var requiresMfa =
                 normalizedSettings.MfaFeatureEnabled &&
-                normalizedSettings.MfaEnforceForAdmins &&
-                roles.Contains(AdminRoleName, StringComparer.OrdinalIgnoreCase);
+                normalizedSettings.MfaEnforcedForAll;
 
-            if (requiresAdminMfa && !user.TwoFactorEnabled && !mfaBypassed)
+            if (requiresMfa && !user.TwoFactorEnabled && !mfaBypassed)
             {
                 return new AuthResponse
                 {
@@ -952,42 +951,9 @@ public class AuthService : IAuthService
                 await _userManager.UpdateAsync(user);
             }
 
-            var mfaBypassed = AccessPolicyEvaluator.IsIpAllowed(runtimeSettings.RequestIpAddress, runtimeSettings.MfaBypassIpWhitelist);
-            var requiresAdminMfa = runtimeSettings.MfaFeatureEnabled && runtimeSettings.MfaEnforceForAdmins &&
-                roles.Contains(AdminRoleName, StringComparer.OrdinalIgnoreCase);
-
-            if (requiresAdminMfa && !user.TwoFactorEnabled && !mfaBypassed)
-            {
-                return new AuthResponse { Success = false, Message = _localizer["MfaSetupRequired"], Errors = new[] { "MFA_SETUP_REQUIRED" } };
-            }
-
-            if (runtimeSettings.MfaFeatureEnabled && user.TwoFactorEnabled && !mfaBypassed)
-            {
-                var providedCode = mfaCode?.Trim();
-                if (string.IsNullOrWhiteSpace(providedCode))
-                {
-                    var mfaDeliveryResult = await SendMfaCodeAsync(user);
-                    if (!mfaDeliveryResult.Success)
-                    {
-                        return new AuthResponse { Success = false, Message = _localizer["MfaCodeDeliveryFailed"], Errors = new[] { "MFA_DELIVERY_FAILED" } };
-                    }
-                    return new AuthResponse { Success = false, Message = _localizer["MfaCodeSent"], Errors = new[] { "MFA_REQUIRED" } };
-                }
-
-                var isMfaCodeValid = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider, providedCode);
-                if (!isMfaCodeValid)
-                {
-                    await _userManager.AccessFailedAsync(user);
-                    if (await _userManager.IsLockedOutAsync(user))
-                    {
-                        return new AuthResponse { Success = false, Message = _localizer["AccountLocked"], Errors = new[] { "LOCKED_OUT" } };
-                    }
-                    return new AuthResponse { Success = false, Message = _localizer["MfaCodeInvalid"], Errors = new[] { "MFA_INVALID" } };
-                }
-
-                await _userManager.ResetAccessFailedCountAsync(user);
-            }
-
+            // MFA is bypassed for Google logins as requested
+            // Google accounts usually have their own MFA and we trust the provider verification.
+            
             var tokenResponse = await _tokenService.GenerateTokensAsync(
                 user,
                 runtimeSettings.SessionAccessTokenLifetimeMinutes,
