@@ -1,0 +1,67 @@
+namespace Eskineria.Core.Shared.Configuration;
+
+public static class SystemSettingKeys
+{
+    public const string AuthLoginEnabled = "Auth.Login.Enabled";
+    public const string AuthRegisterEnabled = "Auth.Register.Enabled";
+    public const string AuthGoogleLoginEnabled = "Auth.Google.Enabled";
+    public const string AuthForgotPasswordEnabled = "Auth.ForgotPassword.Enabled";
+    public const string AuthChangePasswordEnabled = "Auth.ChangePassword.Enabled";
+    public const string AuthSessionManagementEnabled = "Auth.SessionManagement.Enabled";
+    public const string AuthEmailVerificationRequired = "Auth.EmailVerification.Required";
+    public const string AuthEmailVerificationCodeExpirySeconds = "Auth.EmailVerification.CodeExpirySeconds";
+    public const string AuthEmailVerificationResendCooldownSeconds = "Auth.EmailVerification.ResendCooldownSeconds";
+    public const string AuthSessionAccessTokenLifetimeMinutes = "Auth.Session.AccessTokenLifetimeMinutes";
+    public const string AuthSessionRefreshTokenLifetimeDays = "Auth.Session.RefreshTokenLifetimeDays";
+    public const string AuthSessionMaxActiveSessions = "Auth.Session.MaxActiveSessions";
+    public const string AuthSessionIdleTimeoutMinutes = "Auth.Session.IdleTimeoutMinutes";
+    public const string AuthSessionWarningBeforeTimeoutMinutes = "Auth.Session.WarningBeforeTimeoutMinutes";
+    public const string AuthSessionRememberMeDurationDays = "Auth.Session.RememberMeDurationDays";
+    public const string AuthSessionSingleDeviceModeEnabled = "Auth.Session.SingleDeviceModeEnabled";
+    public const string AuthPasswordPolicyMinLength = "Auth.PasswordPolicy.MinLength";
+    public const string AuthPasswordPolicyRequireUppercase = "Auth.PasswordPolicy.RequireUppercase";
+    public const string AuthPasswordPolicyRequireLowercase = "Auth.PasswordPolicy.RequireLowercase";
+    public const string AuthPasswordPolicyRequireDigit = "Auth.PasswordPolicy.RequireDigit";
+    public const string AuthPasswordPolicyRequireNonAlphanumeric = "Auth.PasswordPolicy.RequireNonAlphanumeric";
+    public const string AuthMfaEnforceForAdmins = "Auth.Mfa.EnforceForAdmins";
+    public const string AuthMfaTrustedDeviceDurationDays = "Auth.Mfa.TrustedDeviceDurationDays";
+    public const string AuthMfaBypassIpWhitelist = "Auth.Mfa.BypassIpWhitelist";
+    public const string AuthRegistrationInvitationRequired = "Auth.Registration.InvitationRequired";
+    public const string AuthRegistrationAllowedEmailDomains = "Auth.Registration.AllowedEmailDomains";
+    public const string AuthRegistrationBlockedEmailDomains = "Auth.Registration.BlockedEmailDomains";
+    public const string AuthRegistrationAutoApproveEnabled = "Auth.Registration.AutoApproveEnabled";
+    public const string AuthAccountLifecycleInactiveLockDays = "Auth.AccountLifecycle.InactiveLockDays";
+    public const string AuthAccountLifecycleForcePasswordChangeOnFirstLogin = "Auth.AccountLifecycle.ForcePasswordChangeOnFirstLogin";
+    public const string AuthAccountLifecyclePasswordExpiryDays = "Auth.AccountLifecycle.PasswordExpiryDays";
+    public const string AuthLoginSecurityLockoutEnabled = "Auth.LoginSecurity.LockoutEnabled";
+    public const string AuthLoginSecurityMaxFailedAttempts = "Auth.LoginSecurity.MaxFailedAttempts";
+    public const string AuthLoginSecurityLockoutDurationMinutes = "Auth.LoginSecurity.LockoutDurationMinutes";
+    public const string SystemMaintenanceModeEnabled = "System.MaintenanceMode.Enabled";
+    public const string SystemMaintenanceEndTime = "System.MaintenanceMode.EndTime";
+    public const string SystemMaintenanceMessage = "System.MaintenanceMode.Message";
+    public const string SystemMaintenanceCountdownEnabled = "System.MaintenanceMode.CountdownEnabled";
+    public const string SystemMaintenanceIpWhitelist = "System.MaintenanceMode.IpWhitelist";
+    public const string SystemMaintenanceRoleWhitelist = "System.MaintenanceMode.RoleWhitelist";
+    public const string SystemBrandingApplicationName = "System.Branding.ApplicationName";
+    public const string SystemBrandingApplicationLogoPath = "System.Branding.ApplicationLogoPath";
+    public const string SystemBrandingApplicationFaviconPath = "System.Branding.ApplicationFaviconPath";
+    public const string SystemEmailSenderName = "System.Email.SenderName";
+    public const string SystemEmailSenderAddress = "System.Email.SenderAddress";
+    public const string SystemEmailDailySendLimit = "System.Email.DailySendLimit";
+    public const string SystemEmailRetryMaxAttempts = "System.Email.RetryMaxAttempts";
+    public const string SystemNotificationsLoginAlertEnabled = "System.Notifications.LoginAlertEnabled";
+    public const string SystemNotificationsSecurityEmailRecipients = "System.Notifications.SecurityEmailRecipients";
+    public const string SystemLocalizationDefaultCulture = "System.Localization.DefaultCulture";
+    public const string SystemLocalizationFallbackCulture = "System.Localization.FallbackCulture";
+    public const string SystemLocalizationRequireUserCultureSelection = "System.Localization.RequireUserCultureSelection";
+    public const string SystemAuditRetentionDays = "System.Audit.RetentionDays";
+    public const string SystemAuditCleanupScheduleHourUtc = "System.Audit.CleanupScheduleHourUtc";
+    public const string SystemAuditPiiMaskingEnabled = "System.Audit.PiiMaskingEnabled";
+    public const string SystemAuditLogReadOperationsEnabled = "System.Audit.LogReadOperationsEnabled";
+    public const string SystemAuditLogCreateOperationsEnabled = "System.Audit.LogCreateOperationsEnabled";
+    public const string SystemAuditLogUpdateOperationsEnabled = "System.Audit.LogUpdateOperationsEnabled";
+    public const string SystemAuditLogDeleteOperationsEnabled = "System.Audit.LogDeleteOperationsEnabled";
+    public const string SystemAuditLogOtherOperationsEnabled = "System.Audit.LogOtherOperationsEnabled";
+    public const string SystemAuditLogErrorEventsEnabled = "System.Audit.LogErrorEventsEnabled";
+
+}

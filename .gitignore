@@ -1,0 +1,42 @@
+/ubold/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# .NET artifacts
+**/bin/
+**/obj/
+**/TestResults/
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.binlog
+
+# Runtime/log outputs
+*.log
+**/logs/
+backend/**/wwwroot/uploads/
+
+# Node / frontend artifacts
+**/node_modules/
+**/dist/
+**/.vite/
+**/.cache/
+**/.eslintcache
+
+# Environment and local override files
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/appsettings.Development.json
+**/appsettings.Local.json
+
+# IDE folders
+.vscode/
+.idea/
+.vs/

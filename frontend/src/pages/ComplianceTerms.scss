@@ -1,0 +1,17 @@
+.compliance-terms-editor .ql-toolbar.ql-snow,
+.compliance-terms-editor .ql-container.ql-snow {
+    border-color: #d6dfed;
+}
+
+.compliance-terms-editor .ql-toolbar.ql-snow {
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.compliance-terms-editor .ql-container.ql-snow {
+    border-radius: 0 0 0.75rem 0.75rem;
+    min-height: 22rem;
+}
+
+.compliance-terms-editor .ql-editor {
+    min-height: 20rem;
+}
