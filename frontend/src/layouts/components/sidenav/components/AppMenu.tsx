@@ -138,7 +138,7 @@ const AppMenu = () => {
     }
 
     const filterMenu = (items: MenuItemType[]): MenuItemType[] => {
-        return items
+        const filtered = items
             .map((item) => {
                 if (item.children && item.children.length > 0) {
                     const filteredChildren = filterMenu(item.children)
@@ -151,6 +151,23 @@ const AppMenu = () => {
                 return canView(item) ? item : null
             })
             .filter((item): item is MenuItemType => item !== null)
+
+        // Hide section titles when the section has no visible entries.
+        return filtered.filter((item, index, arr) => {
+            if (!item.isTitle) {
+                return true
+            }
+
+            for (let i = index + 1; i < arr.length; i += 1) {
+                if (arr[i].isTitle) {
+                    return false
+                }
+
+                return true
+            }
+
+            return false
+        })
     }
 
     const visibleMenuItems = useMemo(() => filterMenu(menuItems), [permissions, activeRole])

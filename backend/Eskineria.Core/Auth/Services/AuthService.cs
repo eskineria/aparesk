@@ -806,7 +806,7 @@ public class AuthService : IAuthService
         if (role == null) return;
 
         var claims = await _roleManager.GetClaimsAsync(role);
-        var basePermissions = new[] { Permissions.DashboardView, Permissions.ComplianceRead };
+        var basePermissions = new[] { Permissions.DashboardView };
 
         foreach (var permission in basePermissions)
         {
