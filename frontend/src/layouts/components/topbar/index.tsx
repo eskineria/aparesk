@@ -2,7 +2,6 @@
 import { useLayoutContext } from '@/context/useLayoutContext'
 import CustomizerToggler from '@/layouts/components/topbar/components/CustomizerToggler'
 import LanguageDropdown from '@/layouts/components/topbar/components/LanguageDropdown'
-import MessageDropdown from '@/layouts/components/topbar/components/MessageDropdown'
 import ThemeToggler from '@/layouts/components/topbar/components/ThemeToggler'
 import UserProfile from '@/layouts/components/topbar/components/UserProfile'
 import RoleSwitcher from '@/layouts/components/topbar/components/RoleSwitcher'
@@ -71,8 +70,6 @@ const Topbar = () => {
 
                 <div className="d-flex align-items-center gap-2">
                     <LanguageDropdown />
-
-                    <MessageDropdown />
 
                     <ThemeToggler />
 

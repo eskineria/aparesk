@@ -1290,5 +1290,5 @@
             "delete_confirm": "Delete \"{{name}}\" version {{version}}?"
         }
     },
-    "SmtpDeliveryFailedError": "Failed to send email. Please check your system settings and connection."
+    "SmtpDeliveryFailedError": "Email delivery failed. Please check your system settings and internet connection."
 }
