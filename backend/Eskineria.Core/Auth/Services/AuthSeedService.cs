@@ -23,7 +23,8 @@ public sealed class AuthSeedService
         Permissions.LocalizationManage,
         Permissions.AuditRead,
         Permissions.EmailRead,
-        Permissions.EmailManage
+        Permissions.EmailManage,
+        Permissions.DashboardView
     ];
 
     private static readonly string[] ManagerBaseScreenPermissions =
@@ -40,7 +41,8 @@ public sealed class AuthSeedService
         Permissions.LocalizationManage,
         Permissions.AuditRead,
         Permissions.EmailRead,
-        Permissions.EmailManage
+        Permissions.EmailManage,
+        Permissions.DashboardView
     ];
 
     private readonly UserManager<EskineriaUser> _userManager;

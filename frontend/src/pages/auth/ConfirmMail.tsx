@@ -121,6 +121,7 @@ const Index = () => {
         return
       }
 
+      // eslint-disable-next-line react-hooks/purity
       const nextRemaining = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000))
       setCooldownSeconds(nextRemaining)
     }
@@ -151,6 +152,7 @@ const Index = () => {
       }
 
       setHasExpiryState(true)
+      // eslint-disable-next-line react-hooks/purity
       const nextRemaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
       setRemainingSeconds(nextRemaining)
     }

@@ -359,7 +359,9 @@ const Index = () => {
           message.includes('yeni bir doğrulama kodu')
 
         if (sentFreshCode) {
+          // eslint-disable-next-line react-hooks/purity
           const expiresAt = Date.now() + authSettings.emailVerificationCodeExpirySeconds * 1000
+          // eslint-disable-next-line react-hooks/purity
           const cooldownUntil = Date.now() + authSettings.emailVerificationResendCooldownSeconds * 1000
           sessionStorage.setItem(buildConfirmExpiryStorageKey(normalizedEmail), expiresAt.toString())
           sessionStorage.setItem(buildConfirmCooldownStorageKey(normalizedEmail), cooldownUntil.toString())

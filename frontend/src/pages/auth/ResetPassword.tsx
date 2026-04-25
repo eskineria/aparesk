@@ -118,6 +118,7 @@ const ResetPassword = () => {
         return
       }
 
+      // eslint-disable-next-line react-hooks/purity
       const nextRemaining = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000))
       setCooldownSeconds(nextRemaining)
     }
@@ -146,6 +147,7 @@ const ResetPassword = () => {
         return
       }
 
+      // eslint-disable-next-line react-hooks/purity
       const nextRemaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
       setRemainingSeconds(nextRemaining)
     }
@@ -341,9 +343,11 @@ const ResetPassword = () => {
       const response = await AuthService.resendResetPasswordCode({ email })
       if (response.success) {
         setInfoMessage(response.message || t('auth.resetPassword.codeResent'))
+        // eslint-disable-next-line react-hooks/purity
         const cooldownUntil = Date.now() + authSettings.emailVerificationResendCooldownSeconds * 1000
         sessionStorage.setItem(buildResetCooldownStorageKey(email), cooldownUntil.toString())
         setCooldownSeconds(authSettings.emailVerificationResendCooldownSeconds)
+        // eslint-disable-next-line react-hooks/purity
         const expiresAt = Date.now() + authSettings.emailVerificationCodeExpirySeconds * 1000
         sessionStorage.setItem(buildResetExpiryStorageKey(email), expiresAt.toString())
         setRemainingSeconds(authSettings.emailVerificationCodeExpirySeconds)

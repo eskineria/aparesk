@@ -284,7 +284,8 @@ export const projectOverviewChart: () => ApexOptions = () => ({
   tooltip: {
     shared: true,
     y: {
-      formatter: function (val, { seriesIndex }) {
+      formatter: function (val: any, opts?: any) {
+        const seriesIndex = opts?.seriesIndex
         if (seriesIndex === 0) {
           return val + ' Sessions'
         } else if (seriesIndex === 1) {

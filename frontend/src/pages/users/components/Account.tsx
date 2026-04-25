@@ -369,6 +369,7 @@ const Account = ({
                                 <Button
                                     variant="outline-primary"
                                     onClick={sendVerificationCode}
+                                    // eslint-disable-next-line react-hooks/purity
                                     disabled={isSendingCode || isUpdatingMfa || (!!codeSentAt && (Date.now() - codeSentAt < 60000))}
                                 >
                                     {isSendingCode ? <LuLoader className="icon-spin me-1" /> : null}

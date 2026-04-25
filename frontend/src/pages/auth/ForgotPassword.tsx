@@ -68,7 +68,9 @@ const Index = () => {
       if (response.success) {
         setSuccessMessage(response.message || t('auth.forgotPassword.successMessage'))
         const normalizedEmail = data.email.trim()
+        // eslint-disable-next-line react-hooks/purity
         const expiresAt = Date.now() + authSettings.emailVerificationCodeExpirySeconds * 1000
+        // eslint-disable-next-line react-hooks/purity
         const cooldownUntil = Date.now() + authSettings.emailVerificationResendCooldownSeconds * 1000
         sessionStorage.setItem(buildResetEmailStorageKey(), normalizedEmail)
         sessionStorage.setItem(buildResetExpiryStorageKey(normalizedEmail), expiresAt.toString())

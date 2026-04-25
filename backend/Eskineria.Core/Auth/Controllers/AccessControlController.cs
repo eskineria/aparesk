@@ -13,6 +13,7 @@ namespace Eskineria.Core.Auth.Controllers;
 [Authorize]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
+[HasPermission("Dashboard", "View")]
 public sealed class AccessControlController : AuthApiControllerBase
 {
     private readonly IAccessControlService _accessControlService;

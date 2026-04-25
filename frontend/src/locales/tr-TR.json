@@ -520,7 +520,8 @@
             "Localization": "Dil Yönetimi",
             "Audit": "Denetim Kayıtları",
             "Email": "E-posta",
-            "Products": "Ürünler"
+            "Products": "Ürünler",
+            "Dashboard": "Panel"
         },
         "names": {
             "Compliance.Read": "Uyum Dokümanlarını Görüntüle",
@@ -537,7 +538,8 @@
             "Email.Read": "E-posta Kayıtlarını Görüntüle",
             "Email.Manage": "E-posta Şablonlarını Yönet",
             "Products.Read": "Ürünleri Görüntüle",
-            "Products.Manage": "Ürünleri Yönet"
+            "Products.Manage": "Ürünleri Yönet",
+            "Dashboard.View": "Paneli Görüntüle"
         },
         "no_users_found": "Kullanıcı bulunamadı",
         "no_roles_found": "Rol bulunamadı",

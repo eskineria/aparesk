@@ -520,7 +520,8 @@
             "Localization": "Localization",
             "Audit": "Audit Logs",
             "Email": "Email",
-            "Products": "Products"
+            "Products": "Products",
+            "Dashboard": "Dashboard"
         },
         "names": {
             "Compliance.Read": "View Compliance Terms",
@@ -537,7 +538,8 @@
             "Email.Read": "View Email Logs",
             "Email.Manage": "Manage Email Templates",
             "Products.Read": "View Products",
-            "Products.Manage": "Manage Products"
+            "Products.Manage": "Manage Products",
+            "Dashboard.View": "View Dashboard"
         },
         "no_users_found": "No users found",
         "no_roles_found": "No roles found",

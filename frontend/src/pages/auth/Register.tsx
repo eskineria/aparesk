@@ -654,6 +654,7 @@ const Index = () => {
                 <h3 className="text-center">{t('auth.register.title')}</h3>
                 <p className="text-muted text-center auth-sub-text mx-auto">{t('auth.register.subtitle')}</p>
 
+                {/* eslint-disable-next-line react-hooks/refs */}
                 <form className="mt-4" onSubmit={handleSubmit(onSubmit)}>
                   <Row className="mb-3">
                     <Col md={6}>

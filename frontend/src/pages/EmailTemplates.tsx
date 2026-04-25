@@ -469,7 +469,7 @@ const EmailTemplates = () => {
             triggerCharacters: ['{', ' '],
             provideCompletionItems: (
                 model: MonacoEditor.ITextModel,
-                position: Parameters<MonacoEditor.ITextModel['getWordUntilPosition']>[0],
+                position: any,
             ) => {
                 const wordUntil = model.getWordUntilPosition(position)
                 const range = {

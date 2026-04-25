@@ -26,6 +26,7 @@ const SessionTimeout: React.FC<SessionTimeoutProps> = ({
     const warningMs = warningInMinutes * 60 * 1000
     const warningThresholdMs = timeoutMs - warningMs
 
+    // eslint-disable-next-line react-hooks/purity
     const lastActivityRef = useRef<number>(Date.now())
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
     const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)

@@ -85,7 +85,7 @@ const DEFAULT_SETTINGS: AuthSystemSettings = {
     passwordRequireDigit: true,
     passwordRequireNonAlphanumeric: false,
     mfaFeatureEnabled: true,
-    mfaEnforceForAdmins: false,
+    mfaEnforcedForAll: false,
     mfaTrustedDeviceDurationDays: 30,
     mfaBypassIpWhitelist: '',
     registrationInvitationRequired: false,
