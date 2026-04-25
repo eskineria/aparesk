@@ -20,6 +20,11 @@ const formatDate = (value: string, locale: string) => {
   return date.toLocaleDateString(locale)
 }
 
+const getLocalizedValue = (record: Record<string, string> | null | undefined, culture: string) => {
+  if (!record) return ''
+  return record[culture] || record['en-US'] || record['tr-TR'] || Object.values(record).find(v => !!v) || ''
+}
+
 const Index = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -163,7 +168,7 @@ const Index = () => {
                 </span>
               </div>
 
-              <h6 className="mb-2">{term.summary || getTypeLabel(term.type)}</h6>
+              <h6 className="mb-2">{getLocalizedValue(term.summary, i18n.language) || getTypeLabel(term.type)}</h6>
 
               <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
                 <Form.Check
@@ -213,12 +218,12 @@ const Index = () => {
                 </span>
               </div>
 
-              <h5>{selectedTerm.summary || getTypeLabel(selectedTerm.type)}</h5>
+              <h5>{getLocalizedValue(selectedTerm.summary, i18n.language) || getTypeLabel(selectedTerm.type)}</h5>
 
               <div
                 className="border rounded p-3 bg-light-subtle mt-3"
                 style={{ maxHeight: 420, overflowY: 'auto' }}
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedTerm.content) }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(selectedTerm.content, i18n.language)) }}
               />
             </>
           ) : null}

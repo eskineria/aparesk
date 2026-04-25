@@ -1,5 +1,6 @@
 using Eskineria.Core.Mapping.Abstractions;
 using Eskineria.Core.Compliance.Entities;
+using Eskineria.Core.Shared.Localization;
 using TypeAdapterConfig = Mapster.TypeAdapterConfig;
 
 namespace Eskineria.Core.Compliance.Models;
@@ -9,8 +10,8 @@ public class TermsDto : IMapFrom<TermsAndConditions>
     public Guid Id { get; set; }
     public string Type { get; set; } = string.Empty;
     public string Version { get; set; } = string.Empty;
-    public string Content { get; set; } = string.Empty;
-    public string? Summary { get; set; }
+    public LocalizedContent Content { get; set; } = new();
+    public LocalizedContent Summary { get; set; } = new();
     public DateTime EffectiveDate { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsActive { get; set; }
@@ -25,15 +26,15 @@ public class CreateTermsDto
 {
     public string Type { get; set; } = string.Empty;
     public string Version { get; set; } = string.Empty;
-    public string Content { get; set; } = string.Empty;
-    public string? Summary { get; set; }
+    public LocalizedContent Content { get; set; } = new();
+    public LocalizedContent? Summary { get; set; }
     public DateTime EffectiveDate { get; set; }
 }
 
 public class UpdateTermsDto
 {
-    public string Content { get; set; } = string.Empty;
-    public string? Summary { get; set; }
+    public LocalizedContent Content { get; set; } = new();
+    public LocalizedContent? Summary { get; set; }
     public bool IsActive { get; set; }
 }
 

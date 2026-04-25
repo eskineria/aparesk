@@ -1,24 +1,25 @@
 import DOMPurify from 'dompurify'
 import { useEffect, useMemo, useState } from 'react'
-import ReactQuill from 'react-quill'
-import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap'
+import ReactQuill from 'react-quill-new'
+import { Alert, Badge, Button, Card, Col, Container, Form, Nav, Row, Spinner, Table } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import DeleteConfirmationModal from '@/components/table/DeleteConfirmationModal'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
 import { useAuth } from '@/context/AuthContext'
 import VerticalLayout from '@/layouts/VerticalLayout'
 import { ComplianceService } from '@/services/complianceService'
+import localizationService from '@/services/localizationService'
 import type { CreateTermsDto, TermsDto, UpdateTermsDto } from '@/types/compliance'
 import { showToast } from '@/utils/toast'
-import 'react-quill/dist/quill.snow.css'
+import 'react-quill-new/dist/quill.snow.css'
 import './ComplianceTerms.scss'
 
 type TermsFormState = {
     type: string
     version: string
-    summary: string
+    summary: Record<string, string>
     effectiveDate: string
-    content: string
+    content: Record<string, string>
     isActive: boolean
 }
 
@@ -52,9 +53,9 @@ const toDateTimeLocalValue = (iso: string | null | undefined) => {
 const createDefaultForm = (): TermsFormState => ({
     type: 'TermsOfService',
     version: '',
-    summary: '',
+    summary: {},
     effectiveDate: toDateTimeLocalValue(new Date().toISOString()),
-    content: '',
+    content: {},
     isActive: false,
 })
 
@@ -89,9 +90,52 @@ const ComplianceTerms = () => {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [previewId, setPreviewId] = useState<string | null>(null)
     const [deleteTarget, setDeleteTarget] = useState<TermsDto | null>(null)
-    const [form, setForm] = useState<TermsFormState>(createDefaultForm)
+    const [form, setForm] = useState<TermsFormState>(createDefaultForm())
+    const [cultures, setCultures] = useState<{ code: string; name: string }[]>([]);
+    const [formCulture, setFormCulture] = useState(i18n.language)
+
+    const fetchCultures = async () => {
+        try {
+            const codes = await localizationService.getCultures();
+            const languageNames = new Intl.DisplayNames([i18n.language], { type: 'language' });
+            
+            const mapped = codes.map(code => {
+                const langCode = code.split('-')[0];
+                let name = code;
+                try {
+                    name = languageNames.of(langCode) || code;
+                    // Capitalize first letter
+                    name = name.charAt(0).toUpperCase() + name.slice(1);
+                } catch (e) {
+                    // Fallback to code if name cannot be resolved
+                }
+                return { code, name };
+            });
+            
+            setCultures(mapped);
+            if (mapped.length > 0 && !mapped.find(c => c.code === formCulture)) {
+                setFormCulture(mapped[0].code);
+            }
+        } catch (error) {
+            console.error('Failed to fetch cultures', error);
+            // Fallback to basic list if API fails
+            setCultures([
+                { code: 'tr-TR', name: 'Türkçe' },
+                { code: 'en-US', name: 'English' }
+            ]);
+        }
+    };
+
+    useEffect(() => {
+        fetchCultures();
+    }, [i18n.language]);
 
     const tt = (key: string, fallback: string) => t(key, fallback)
+
+    const getLocalizedValue = (record: Record<string, string> | null | undefined, culture: string) => {
+        if (!record) return ''
+        return record[culture] || record['en-US'] || record['tr-TR'] || Object.values(record).find(v => !!v) || ''
+    }
 
     const loadTerms = async (nextPreviewId?: string | null) => {
         setIsLoading(true)
@@ -174,9 +218,9 @@ const ComplianceTerms = () => {
         setForm({
             type: term.type,
             version: term.version,
-            summary: term.summary ?? '',
+            summary: { ...term.summary },
             effectiveDate: toDateTimeLocalValue(term.effectiveDate),
-            content: term.content,
+            content: { ...term.content },
             isActive: term.isActive,
         })
     }
@@ -197,8 +241,9 @@ const ComplianceTerms = () => {
             return false
         }
 
-        if (!form.content.trim()) {
-            showToast(tt('identity.compliance_terms.validation_content_required', 'Terms content is required.'), 'warning')
+        const hasContent = Object.values(form.content).some(val => val.trim().length > 0)
+        if (!hasContent) {
+            showToast(tt('identity.compliance_terms.validation_content_required', 'Terms content is required in at least one language.'), 'warning')
             return false
         }
 
@@ -215,8 +260,8 @@ const ComplianceTerms = () => {
             if (editingTerm) {
                 const shouldActivate = form.isActive && !editingTerm.isActive
                 const updatePayload: UpdateTermsDto = {
-                    content: form.content.trim(),
-                    summary: form.summary.trim() || null,
+                    content: { ...form.content },
+                    summary: { ...form.summary },
                     isActive: editingTerm.isActive ? form.isActive : false,
                 }
 
@@ -242,8 +287,8 @@ const ComplianceTerms = () => {
             const createPayload: CreateTermsDto = {
                 type: form.type.trim(),
                 version: form.version.trim(),
-                content: form.content.trim(),
-                summary: form.summary.trim() || null,
+                content: { ...form.content },
+                summary: { ...form.summary },
                 effectiveDate: new Date(form.effectiveDate).toISOString(),
             }
 
@@ -409,7 +454,7 @@ const ComplianceTerms = () => {
                                                                 className="btn btn-link p-0 text-start text-decoration-none fw-semibold"
                                                                 onClick={() => setPreviewId(term.id)}
                                                             >
-                                                                {term.summary || tt('identity.compliance_terms.no_summary', 'No summary')}
+                                                                {getLocalizedValue(term.summary, i18n.language) || tt('identity.compliance_terms.no_summary', 'No summary')}
                                                             </button>
                                                             <div className="small text-muted">
                                                                 {tt('identity.compliance_terms.created_at', 'Created')}: {formatDateTime(term.createdAt, i18n.language)}
@@ -474,14 +519,14 @@ const ComplianceTerms = () => {
                                             <span className="text-muted small">{previewTerm.type}</span>
                                             <span className="text-muted small">v{previewTerm.version}</span>
                                         </div>
-                                        <h6>{previewTerm.summary || tt('identity.compliance_terms.no_summary', 'No summary')}</h6>
+                                        <h6>{getLocalizedValue(previewTerm.summary, i18n.language) || tt('identity.compliance_terms.no_summary', 'No summary')}</h6>
                                         <div className="text-muted small mb-3">
                                             {tt('identity.compliance_terms.effective_date', 'Effective date')}: {formatDateTime(previewTerm.effectiveDate, i18n.language)}
                                         </div>
                                         <div
                                             className="border rounded p-3 bg-light-subtle"
                                             style={{ maxHeight: 480, overflowY: 'auto' }}
-                                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewTerm.content) }}
+                                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(previewTerm.content, i18n.language)) }}
                                         />
                                     </>
                                 ) : (
@@ -575,23 +620,49 @@ const ComplianceTerms = () => {
                                             </Alert>
                                         ) : null}
 
+                                        <hr className="my-4" />
+
+                                        <div className="d-flex align-items-center justify-content-between mb-3">
+                                            <h6 className="mb-0">{tt('identity.compliance_terms.localized_content', 'Localized Content')}</h6>
+                                            <Nav variant="pills" activeKey={formCulture} onSelect={(k) => k && setFormCulture(k)}>
+                                                {cultures.map((c) => (
+                                                    <Nav.Item key={c.code}>
+                                                        <Nav.Link eventKey={c.code} size="sm">
+                                                            {c.name}
+                                                        </Nav.Link>
+                                                    </Nav.Item>
+                                                ))}
+                                            </Nav>
+                                        </div>
+
                                         <Form.Group className="mb-3">
-                                            <Form.Label htmlFor="terms-summary">{tt('identity.compliance_terms.summary', 'Summary')}</Form.Label>
+                                            <Form.Label htmlFor={`terms-summary-${formCulture}`}>
+                                                {tt('identity.compliance_terms.summary', 'Summary')} ({formCulture})
+                                            </Form.Label>
                                             <Form.Control
-                                                id="terms-summary"
-                                                value={form.summary}
-                                                onChange={(event) => setForm((prev) => ({ ...prev, summary: event.target.value }))}
+                                                id={`terms-summary-${formCulture}`}
+                                                value={form.summary[formCulture] || ''}
+                                                onChange={(event) => setForm((prev) => ({
+                                                    ...prev,
+                                                    summary: { ...prev.summary, [formCulture]: event.target.value }
+                                                }))}
                                             />
                                         </Form.Group>
 
                                         <Form.Group className="mb-3">
-                                            <Form.Label htmlFor="terms-content">{tt('identity.compliance_terms.content', 'Content')}</Form.Label>
+                                            <Form.Label htmlFor={`terms-content-${formCulture}`}>
+                                                {tt('identity.compliance_terms.content', 'Content')} ({formCulture})
+                                            </Form.Label>
                                             <div className="compliance-terms-editor">
                                                 <ReactQuill
+                                                    key={formCulture}
                                                     theme="snow"
                                                     modules={editorModules}
-                                                    value={form.content}
-                                                    onChange={(value) => setForm((prev) => ({ ...prev, content: value }))}
+                                                    value={form.content[formCulture] || ''}
+                                                    onChange={(value) => setForm((prev) => ({
+                                                        ...prev,
+                                                        content: { ...prev.content, [formCulture]: value }
+                                                    }))}
                                                 />
                                             </div>
                                         </Form.Group>
@@ -646,7 +717,7 @@ const ComplianceTerms = () => {
                     ? t(
                         'identity.compliance_terms.delete_confirm',
                         {
-                            name: deleteTarget.summary || deleteTarget.type,
+                            name: getLocalizedValue(deleteTarget.summary, i18n.language) || deleteTarget.type,
                             version: deleteTarget.version,
                             defaultValue: 'Delete "{{name}}" version {{version}}?',
                         },

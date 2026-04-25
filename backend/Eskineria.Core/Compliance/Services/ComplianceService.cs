@@ -75,6 +75,7 @@ public class ComplianceService : IComplianceService
         }
 
         var terms = await GetLatestActiveTermByTypeAsync(normalizedType);
+
         if (terms == null)
             return DataResponse<TermsDto>.Fail(_localizer[LocalizationKeys.NoActiveTermsFoundForType, normalizedType], 404);
 
@@ -158,6 +159,13 @@ public class ComplianceService : IComplianceService
         var terms = await _termsRepository.GetByIdAsync(id);
         if (terms == null)
             return Response.Fail(_localizer[LocalizationKeys.TermsNotFound], 404);
+
+        // Check if there are any acceptances
+        var hasAcceptances = await _userTermsAcceptanceRepository.GetAsync(x => x.TermsAndConditionsId == id) != null;
+        if (hasAcceptances)
+        {
+            return Response.Fail(_localizer["TermsCannotBeDeletedWithAcceptances"]);
+        }
 
         await _termsRepository.DeleteAsync(terms);
         await _termsRepository.SaveChangesAsync();
@@ -291,7 +299,7 @@ public class ComplianceService : IComplianceService
                 requiredTypes.Contains(x.Type))
                 .OrderByDescending(x => x.EffectiveDate));
 
-        // Defensive collapse: if there are multiple active versions per type, keep latest.
+        // Group by type and select latest
         var latestByType = activeRequiredTerms
             .GroupBy(x => x.Type, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.OrderByDescending(x => x.EffectiveDate).First())
@@ -376,7 +384,11 @@ public class ComplianceService : IComplianceService
         var documentName = GetDocumentDisplayName(terms.Type);
         var subject = _localizer["ComplianceReacceptanceEmailSubject", documentName].Value;
         var effectiveDate = terms.EffectiveDate.ToString("yyyy-MM-dd");
-        var summary = string.IsNullOrWhiteSpace(terms.Summary) ? documentName : terms.Summary.Trim();
+        var summary = terms.Summary.CurrentValue;
+        if (string.IsNullOrWhiteSpace(summary))
+        {
+            summary = documentName;
+        }
 
         var recipients = await _userManager.Users
             .AsNoTracking()

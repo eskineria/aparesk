@@ -379,6 +379,7 @@
     "TermsAlreadyAccepted": "Sözleşme zaten kabul edilmiş.",
     "TermsAcceptedSuccessfully": "Sözleşme başarıyla kabul edildi.",
     "UserAcceptancesRetrievedSuccessfully": "Kullanıcı kabul kayıtları başarıyla getirildi.",
+    "TermsCannotBeDeletedWithAcceptances": "Bu sözleşme kullanıcılar tarafından kabul edildiği için silinemez. Silmek yerine pasif hale getirebilirsiniz.",
     "NoActiveTermsFound": "Aktif sözleşme bulunamadı.",
     "UserHasAcceptedLatestTerms": "Kullanıcı en güncel sözleşmeyi kabul etmiş.",
     "UserHasNotAcceptedLatestTerms": "Kullanıcı en güncel sözleşmeyi kabul etmemiş.",

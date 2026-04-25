@@ -18,6 +18,11 @@ import type { TermsDto } from '@/types/compliance'
 import type { AuthSystemSettings } from '@/types/systemSettings'
 import { showToast } from '@/utils/toast'
 
+const getLocalizedValue = (record: Record<string, string> | null | undefined, culture: string) => {
+  if (!record) return ''
+  return record[culture] || record['en-US'] || record['tr-TR'] || Object.values(record).find(v => !!v) || ''
+}
+
 type RegisterTermsType = 'TermsOfService' | 'PrivacyPolicy'
 
 const DEFAULT_AUTH_SETTINGS: AuthSystemSettings = {
@@ -35,7 +40,7 @@ const DEFAULT_AUTH_SETTINGS: AuthSystemSettings = {
 
 const Index = () => {
   const emptyCodeDigits = () => Array.from({ length: 6 }, () => '');
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { applicationName } = useBranding();
   const [password, setPassword] = useState('');
@@ -835,7 +840,7 @@ const Index = () => {
             </div>
           ) : activeTerms ? (
             <div className="terms-content">
-              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(activeTerms.content) }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(activeTerms.content, i18n.language)) }} />
               <div className="mt-3 text-muted small">
                 {t('auth.register.termsVersion')}: {activeTerms.version} | {t('auth.register.termsDate')}: {new Date(activeTerms.effectiveDate).toLocaleDateString()}
               </div>

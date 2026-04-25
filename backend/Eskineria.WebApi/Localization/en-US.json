@@ -379,6 +379,7 @@
     "TermsAlreadyAccepted": "Terms already accepted.",
     "TermsAcceptedSuccessfully": "Terms accepted successfully.",
     "UserAcceptancesRetrievedSuccessfully": "User acceptances retrieved successfully.",
+    "TermsCannotBeDeletedWithAcceptances": "This terms cannot be deleted because it has already been accepted by users. You can deactivate it instead.",
     "NoActiveTermsFound": "No active terms found.",
     "UserHasAcceptedLatestTerms": "User has accepted latest terms.",
     "UserHasNotAcceptedLatestTerms": "User has not accepted latest terms.",

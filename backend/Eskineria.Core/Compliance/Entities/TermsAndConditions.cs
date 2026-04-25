@@ -1,15 +1,15 @@
 using Eskineria.Core.Shared.Exceptions;
+using Eskineria.Core.Shared.Localization;
 
 namespace Eskineria.Core.Compliance.Entities;
 
 /// <summary>
-/// Represents a version of Terms and Conditions or Privacy Policy
+/// Represents a version of Terms and Conditions or Privacy Policy with multi-language support
 /// </summary>
 public class TermsAndConditions
 {
     private const int MaxTypeLength = 50;
     private const int MaxVersionLength = 20;
-    private const int MaxSummaryLength = 500;
 
     public Guid Id { get; set; }
     
@@ -24,14 +24,14 @@ public class TermsAndConditions
     public string Version { get; set; } = string.Empty;
     
     /// <summary>
-    /// Full content of the terms (can be HTML or Markdown)
+    /// Localized content of the terms (JSON mapping)
     /// </summary>
-    public string Content { get; set; } = string.Empty;
+    public LocalizedContent Content { get; set; } = new();
     
     /// <summary>
-    /// Short summary or title
+    /// Localized summary or title (JSON mapping)
     /// </summary>
-    public string? Summary { get; set; }
+    public LocalizedContent Summary { get; set; } = new();
     
     /// <summary>
     /// When this version becomes effective
@@ -56,8 +56,8 @@ public class TermsAndConditions
     public static TermsAndConditions Create(
         string type,
         string version,
-        string content,
-        string? summary,
+        LocalizedContent content,
+        LocalizedContent? summary,
         DateTime effectiveDate,
         DateTime? createdAtUtc = null)
     {
@@ -70,19 +70,19 @@ public class TermsAndConditions
             Id = Guid.NewGuid(),
             Type = type.Trim(),
             Version = version.Trim(),
-            Content = content.Trim(),
-            Summary = NormalizeSummary(summary),
+            Content = content,
+            Summary = summary ?? new(),
             EffectiveDate = effectiveDate,
             CreatedAt = createdAtUtc ?? DateTime.UtcNow,
             IsActive = false
         };
     }
 
-    public void UpdateContent(string content, string? summary, bool isActive)
+    public void UpdateContent(LocalizedContent content, LocalizedContent? summary, bool isActive)
     {
         EnsureContent(content);
-        Content = content.Trim();
-        Summary = NormalizeSummary(summary);
+        Content = content;
+        Summary = summary ?? new();
         IsActive = isActive;
     }
 
@@ -94,22 +94,6 @@ public class TermsAndConditions
     public void Deactivate()
     {
         IsActive = false;
-    }
-
-    private static string? NormalizeSummary(string? summary)
-    {
-        if (string.IsNullOrWhiteSpace(summary))
-        {
-            return null;
-        }
-
-        var normalized = summary.Trim();
-        if (normalized.Length > MaxSummaryLength)
-        {
-            throw new DomainException($"Terms summary cannot exceed {MaxSummaryLength} characters.");
-        }
-
-        return normalized;
     }
 
     private static void EnsureType(string type)
@@ -138,11 +122,11 @@ public class TermsAndConditions
         }
     }
 
-    private static void EnsureContent(string content)
+    private static void EnsureContent(LocalizedContent content)
     {
-        if (string.IsNullOrWhiteSpace(content))
+        if (content == null || content.Count == 0 || content.All(x => string.IsNullOrWhiteSpace(x.Value)))
         {
-            throw new DomainException("Terms content is required.");
+            throw new DomainException("Terms content is required in at least one language.");
         }
     }
 }

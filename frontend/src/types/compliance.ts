@@ -2,8 +2,8 @@ export interface TermsDto {
     id: string;
     type: string;
     version: string;
-    content: string;
-    summary: string | null;
+    content: Record<string, string>;
+    summary: Record<string, string>;
     effectiveDate: string;
     createdAt: string;
     isActive: boolean;
@@ -12,14 +12,14 @@ export interface TermsDto {
 export interface CreateTermsDto {
     type: string;
     version: string;
-    content: string;
-    summary?: string | null;
+    content: Record<string, string>;
+    summary?: Record<string, string>;
     effectiveDate: string;
 }
 
 export interface UpdateTermsDto {
-    content: string;
-    summary?: string | null;
+    content: Record<string, string>;
+    summary?: Record<string, string> | null;
     isActive: boolean;
 }
 
