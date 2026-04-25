@@ -386,7 +386,7 @@ const Localization = () => {
             <PageBreadcrumb title={t('identity.localization.title')} subtitle={t('identity.title')} />
             <Container fluid>
                 <Card className="border-0 shadow-sm overflow-hidden">
-                    <CardHeader className="bg-white border-bottom border-light d-flex flex-wrap align-items-center justify-content-between gap-3 p-3">
+                    <CardHeader className="border-bottom border-light d-flex flex-wrap align-items-center justify-content-between gap-3 p-3">
                         <div className="d-flex flex-wrap gap-2 align-items-center flex-grow-1">
                             {/* Search */}
                             <div className="app-search" style={{ minWidth: '280px' }}>
@@ -693,18 +693,26 @@ const Localization = () => {
                     align-items: center;
                     justify-content: center;
                     transition: all 0.2s;
+                    background: transparent;
+                    border: 1px solid transparent;
                 }
                 .btn-icon:hover {
-                    background-color: #fff !important;
+                    background-color: var(--bs-tertiary-bg) !important;
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+                    box-shadow: var(--bs-box-shadow-sm) !important;
+                    border-color: var(--bs-border-color);
                 }
                 .table-custom tr:hover {
-                    background-color: rgba(var(--bs-primary-rgb), 0.02);
+                    background-color: rgba(var(--bs-primary-rgb), 0.05);
                 }
                 .italic { font-style: italic; }
                 .app-search .form-select {
                     background-image: none;
+                }
+                [data-bs-theme="dark"] .app-search .form-control,
+                [data-bs-theme="dark"] .app-search .form-select {
+                    background-color: var(--bs-tertiary-bg);
+                    border-color: var(--bs-border-color);
                 }
             `}</style>
         </VerticalLayout >

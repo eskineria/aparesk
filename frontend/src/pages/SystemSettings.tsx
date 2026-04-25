@@ -468,8 +468,8 @@ const SystemSettings = () => {
                                                                 <Form.Label className="fw-bold mb-2">
                                                                     {t('identity.system_settings.application_logo')}
                                                                 </Form.Label>
-                                                                <div className="branding-asset-card p-3 border rounded shadow-sm bg-light bg-opacity-10">
-                                                                    <div className="branding-asset-preview mb-2 d-flex align-items-center justify-content-center border rounded bg-white" style={{ height: '120px', overflow: 'hidden' }}>
+                                                                <div className="branding-asset-card p-3 border rounded shadow-sm">
+                                                                    <div className={`branding-asset-preview mb-2 d-flex align-items-center justify-content-center border rounded ${!settings.applicationLogoUrl ? 'is-empty' : ''}`} style={{ height: '120px', overflow: 'hidden' }}>
                                                                         {settings.applicationLogoUrl ? (
                                                                             <img
                                                                                 src={getAssetUrl(settings.applicationLogoUrl)!}
@@ -507,8 +507,8 @@ const SystemSettings = () => {
                                                                 <Form.Label className="fw-bold mb-2">
                                                                     {t('identity.system_settings.application_favicon')}
                                                                 </Form.Label>
-                                                                <div className="branding-asset-card p-3 border rounded shadow-sm bg-light bg-opacity-10">
-                                                                    <div className="branding-asset-preview mb-2 d-flex align-items-center justify-content-center border rounded bg-white" style={{ height: '120px', overflow: 'hidden' }}>
+                                                                <div className="branding-asset-card p-3 border rounded shadow-sm">
+                                                                    <div className={`branding-asset-preview mb-2 d-flex align-items-center justify-content-center border rounded ${!settings.applicationFaviconUrl ? 'is-empty' : ''}`} style={{ height: '120px', overflow: 'hidden' }}>
                                                                         {settings.applicationFaviconUrl ? (
                                                                             <div className="text-center">
                                                                                 <img
