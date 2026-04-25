@@ -20,12 +20,12 @@
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "countup": "^1.8.2",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.4.1",
     "i18next": "^25.8.0",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
     "lucide-react": "^0.563.0",
-    "quill": "^2.0.3",
+    "quill": "2.0.2",
     "react": "^18.2.0",
     "react-apexcharts": "^1.9.0",
     "react-bootstrap": "^2.10.10",
@@ -63,5 +63,9 @@
     "typescript": "^5.4.5",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1"
+  },
+  "overrides": {
+    "dompurify": "^3.4.1",
+    "quill": "2.0.2"
   }
 }
