@@ -189,8 +189,8 @@ const AuthShell = ({
                 </div>
               )}
               {showLogo && (
-                <div className="auth-brand text-center mb-0">
-                  <AppLogo />
+                <div className="auth-brand text-center mb-4">
+                  <AppLogo height={80} />
                 </div>
               )}
 
