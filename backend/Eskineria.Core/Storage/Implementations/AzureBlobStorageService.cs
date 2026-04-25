@@ -153,7 +153,7 @@ public class AzureBlobStorageService : IStorageService
             return;
 
         var prefix = sanitizedFolder.EndsWith('/') ? sanitizedFolder : $"{sanitizedFolder}/";
-        var blobs = _blobContainerClient.GetBlobsAsync(prefix: prefix);
+        var blobs = _blobContainerClient.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, default);
         await foreach (var blob in blobs)
         {
             await _blobContainerClient.DeleteBlobIfExistsAsync(blob.Name);

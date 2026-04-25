@@ -34,9 +34,9 @@ public static class OpenApiConfiguration
             document.Info.Title = "Eskineria App API";
             document.Info.Version = "v1";
             document.Info.Description = "Eskineria App API with Authentication. \n\n" +
-                                      "This API supports the following features:\n" +
-                                      "- **Authentication**: JWT Bearer Token\n" +
-                                      "- **Localization**: Multi-language support";
+                                       "This API supports the following features:\n" +
+                                       "- **Authentication**: JWT Bearer Token\n" +
+                                       "- **Localization**: Multi-language support";
 
             document.Info.Contact = new OpenApiContact
             {
