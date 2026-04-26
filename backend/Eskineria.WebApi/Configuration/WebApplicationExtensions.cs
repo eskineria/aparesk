@@ -110,7 +110,7 @@ public static class WebApplicationExtensions
             var frontendUrl = app.Configuration["FrontendUrl"] ?? "http://localhost:5173";
             context.Response.Headers["Content-Security-Policy"] = $"frame-ancestors 'self' {frontendUrl};";
             
-            context.Response.Headers["Referrer-Policy"] = "no-referrer";
+            context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
             context.Response.Headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
             context.Response.Headers["X-Permitted-Cross-Domain-Policies"] = "none";
 
