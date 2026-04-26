@@ -1,0 +1,58 @@
+using Aparesk.Eskineria.Core.Mapping.Abstractions;
+using Aparesk.Eskineria.Core.Compliance.Entities;
+using Aparesk.Eskineria.Core.Shared.Localization;
+using TypeAdapterConfig = Mapster.TypeAdapterConfig;
+
+namespace Aparesk.Eskineria.Core.Compliance.Models;
+
+public class TermsDto : IMapFrom<TermsAndConditions>
+{
+    public Guid Id { get; set; }
+    public string Type { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+    public LocalizedContent Content { get; set; } = new();
+    public LocalizedContent Summary { get; set; } = new();
+    public DateTime EffectiveDate { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsActive { get; set; }
+
+    public void Mapping(TypeAdapterConfig config)
+    {
+        config.NewConfig<TermsAndConditions, TermsDto>();
+    }
+}
+
+public class CreateTermsDto
+{
+    public string Type { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+    public LocalizedContent Content { get; set; } = new();
+    public LocalizedContent? Summary { get; set; }
+    public DateTime EffectiveDate { get; set; }
+}
+
+public class UpdateTermsDto
+{
+    public LocalizedContent Content { get; set; } = new();
+    public LocalizedContent? Summary { get; set; }
+    public bool IsActive { get; set; }
+}
+
+public class UserTermsAcceptanceDto : IMapFrom<UserTermsAcceptance>
+{
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public Guid TermsAndConditionsId { get; set; }
+    public DateTime AcceptedAt { get; set; }
+    public string? IpAddress { get; set; }
+
+    public void Mapping(TypeAdapterConfig config)
+    {
+        config.NewConfig<UserTermsAcceptance, UserTermsAcceptanceDto>();
+    }
+}
+
+public class AcceptTermsDto
+{
+    public Guid TermsAndConditionsId { get; set; }
+}
