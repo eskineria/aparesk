@@ -107,6 +107,13 @@ public static class LocalizationKeys
     public const string NoActiveTermsFound = "NoActiveTermsFound";
     public const string UserHasAcceptedLatestTerms = "UserHasAcceptedLatestTerms";
     public const string UserHasNotAcceptedLatestTerms = "UserHasNotAcceptedLatestTerms";
+    public const string ComplianceReacceptanceEmailTitle = "ComplianceReacceptanceEmailTitle";
+    public const string ComplianceReacceptanceEmailContent = "ComplianceReacceptanceEmailContent";
+    public const string AgreementNameLabel = "AgreementNameLabel";
+    public const string VersionLabel = "VersionLabel";
+    public const string EffectiveDateLabel = "EffectiveDateLabel";
+    public const string SummaryLabel = "SummaryLabel";
+    public const string ReviewAgreementButton = "ReviewAgreementButton";
 
     // Localization Controller Messages
     public const string LanguageCodeRequired = "LanguageCodeRequired";

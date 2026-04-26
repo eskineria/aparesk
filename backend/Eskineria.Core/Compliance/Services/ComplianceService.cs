@@ -10,6 +10,7 @@ using Eskineria.Core.Compliance.Entities;
 using Eskineria.Core.Repository.Specification;
 using Eskineria.Core.Notifications.Abstractions;
 using Eskineria.Core.Notifications.Models;
+using Eskineria.Core.Notifications.Email;
 using Microsoft.EntityFrameworkCore;
 using Eskineria.Core.Auditing.Abstractions;
 using Eskineria.Core.Auditing.Models;
@@ -32,6 +33,8 @@ public class ComplianceService : IComplianceService
     private readonly UserManager<EskineriaUser> _userManager;
     private readonly INotificationService _notificationService;
     private readonly IConfiguration _configuration;
+    private readonly IEmailTemplateProvider _emailTemplateProvider;
+    private readonly ITemplateRenderer _templateRenderer;
 
     public ComplianceService(
         ITermsRepository termsRepository,
@@ -41,7 +44,9 @@ public class ComplianceService : IComplianceService
         IAuditingStore auditingStore,
         UserManager<EskineriaUser> userManager,
         INotificationService notificationService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IEmailTemplateProvider emailTemplateProvider,
+        ITemplateRenderer templateRenderer)
     {
         _termsRepository = termsRepository;
         _userTermsAcceptanceRepository = userTermsAcceptanceRepository;
@@ -51,6 +56,8 @@ public class ComplianceService : IComplianceService
         _userManager = userManager;
         _notificationService = notificationService;
         _configuration = configuration;
+        _emailTemplateProvider = emailTemplateProvider;
+        _templateRenderer = templateRenderer;
     }
 
     public async Task<DataResponse<List<TermsDto>>> GetAllTermsAsync(string? type = null)
@@ -404,21 +411,59 @@ public class ComplianceService : IComplianceService
             })
             .ToListAsync();
 
+        var template = await _emailTemplateProvider.GetActiveTemplateAsync("ComplianceReacceptance");
+
         foreach (var recipient in recipients)
         {
-            var body = _localizer[
-                "ComplianceReacceptanceEmailBody",
-                string.IsNullOrWhiteSpace(recipient.FirstName) ? recipient.Email! : recipient.FirstName,
-                documentName,
-                terms.Version,
-                effectiveDate,
-                summary,
-                loginUrl].Value;
+            var firstName = string.IsNullOrWhiteSpace(recipient.FirstName) ? recipient.Email! : recipient.FirstName;
+            var body = string.Empty;
+            var finalSubject = subject;
+
+            if (template != null)
+            {
+                var model = new
+                {
+                    Greeting = _localizer["EmailGreeting", firstName].Value,
+                    ComplianceReacceptanceEmailTitle = _localizer[LocalizationKeys.ComplianceReacceptanceEmailTitle].Value,
+                    ComplianceReacceptanceEmailContent = _localizer[LocalizationKeys.ComplianceReacceptanceEmailContent].Value,
+                    AgreementNameLabel = _localizer[LocalizationKeys.AgreementNameLabel].Value,
+                    AgreementName = documentName,
+                    VersionLabel = _localizer[LocalizationKeys.VersionLabel].Value,
+                    Version = terms.Version,
+                    EffectiveDateLabel = _localizer[LocalizationKeys.EffectiveDateLabel].Value,
+                    EffectiveDate = effectiveDate,
+                    SummaryLabel = _localizer[LocalizationKeys.SummaryLabel].Value,
+                    Summary = summary,
+                    ReviewAgreementButton = _localizer[LocalizationKeys.ReviewAgreementButton].Value,
+                    ReviewLink = loginUrl,
+                    EmailTeam = _localizer["EmailTeam"].Value,
+                    EmailFooterIgnore = _localizer["EmailFooterIgnore"].Value
+                };
+
+                if (!string.IsNullOrWhiteSpace(template.Subject))
+                {
+                    finalSubject = await _templateRenderer.RenderAsync(template.Subject, model);
+                }
+
+                body = await _templateRenderer.RenderAsync(template.Body, model);
+            }
+            else
+            {
+                // Fallback to old legacy behavior if template is missing
+                body = _localizer[
+                    "ComplianceReacceptanceEmailBody",
+                    firstName,
+                    documentName,
+                    terms.Version,
+                    effectiveDate,
+                    summary,
+                    loginUrl].Value;
+            }
 
             var result = await _notificationService.SendAsync(new NotificationMessage
             {
                 Recipient = recipient.Email!,
-                Title = subject,
+                Title = finalSubject,
                 Body = body,
                 Channel = NotificationChannel.Email,
                 Data = new Dictionary<string, object>
@@ -428,6 +473,7 @@ public class ComplianceService : IComplianceService
                     ["ComplianceTermsId"] = terms.Id.ToString(),
                     ["ComplianceTermsType"] = terms.Type,
                     ["ComplianceTermsVersion"] = terms.Version,
+                    ["TemplateKey"] = "ComplianceReacceptance"
                 }
             });
 

@@ -44,7 +44,8 @@ public sealed class EmailTemplateSeedService
             ["LoginAlert"] = "{{ LoginAlertEmailTitle }}",
             ["MfaActionCode"] = "{{ MfaActionEmailSubject }}",
             ["MfaLoginCode"] = "{{ MfaVerificationEmailTitle }}",
-            ["AccountLocked"] = "{{ AccountLockedEmailTitle }}"
+            ["AccountLocked"] = "{{ AccountLockedEmailTitle }}",
+            ["ComplianceReacceptance"] = "{{ ComplianceReacceptanceEmailTitle }}"
         };
 
         var legacySubjectsByKey = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
@@ -56,7 +57,8 @@ public sealed class EmailTemplateSeedService
             ["LoginAlert"] = new(StringComparer.OrdinalIgnoreCase) { "New login detected", "Yeni giriş tespit edildi" },
             ["MfaActionCode"] = new(StringComparer.OrdinalIgnoreCase) { "MFA Action Verification Code", "MFA İşlem Doğrulama Kodu" },
             ["MfaLoginCode"] = new(StringComparer.OrdinalIgnoreCase) { "Your MFA verification code", "MFA doğrulama kodunuz" },
-            ["AccountLocked"] = new(StringComparer.OrdinalIgnoreCase) { "Account Locked", "Hesabınız Kilitlendi" }
+            ["AccountLocked"] = new(StringComparer.OrdinalIgnoreCase) { "Account Locked", "Hesabınız Kilitlendi" },
+            ["ComplianceReacceptance"] = new(StringComparer.OrdinalIgnoreCase) { "Compliance Agreement Update", "Uyum Sözleşmesi Güncellemesi" }
         };
 
         var defaultTemplateKeys = subjectPlaceholderByKey.Keys.ToList();
@@ -214,7 +216,9 @@ public sealed class EmailTemplateSeedService
             new("LoginAlert", "tr-TR", "Giriş Uyarısı", "{{ LoginAlertEmailTitle }}", "LoginAlert.sbn"),
             new("MfaActionCode", "tr-TR", "MFA İşlem Kodu", "{{ MfaActionEmailSubject }}", "MfaActionCode.sbn"),
             new("MfaLoginCode", "tr-TR", "MFA Giriş Kodu", "{{ MfaVerificationEmailTitle }}", "MfaLoginCode.sbn"),
-            new("AccountLocked", "tr-TR", "Hesap Kilitlendi", "{{ AccountLockedEmailTitle }}", "AccountLocked.sbn")
+            new("AccountLocked", "tr-TR", "Hesap Kilitlendi", "{{ AccountLockedEmailTitle }}", "AccountLocked.sbn"),
+            new("ComplianceReacceptance", "en-US", "Compliance Update", "{{ ComplianceReacceptanceEmailTitle }}", "ComplianceReacceptance.sbn"),
+            new("ComplianceReacceptance", "tr-TR", "Uyum Güncellemesi", "{{ ComplianceReacceptanceEmailTitle }}", "ComplianceReacceptance.sbn")
         ];
     }
 }
