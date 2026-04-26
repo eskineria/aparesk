@@ -4,7 +4,7 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaExceptionHandler(...)`
+- `AddEskineriaExceptionHandler(...)`
 - exception type to status code map'i
 - host pipeline'da kullanilan centralized exception middleware destegi
 - status code bazli log seviyesi (4xx warning, 5xx error)
@@ -24,7 +24,7 @@
 ## Register
 
 ```csharp
-services.AddAparesk.EskineriaExceptionHandler(options =>
+services.AddEskineriaExceptionHandler(options =>
 {
     options.Map<ArgumentException>(400, "Bad Request", "BAD_REQUEST");
     options.Map<KeyNotFoundException>(404, "Not Found", "NOT_FOUND");

@@ -4,7 +4,7 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaNotifications()`
+- `AddEskineriaNotifications()`
 - `AddEmailChannel(configuration)`
 - `INotificationService`
 - `IEmailTemplateService`
@@ -29,7 +29,7 @@
 ## Register
 
 ```csharp
-services.AddAparesk.EskineriaNotifications();
+services.AddEskineriaNotifications();
 services.AddEmailChannel(configuration);
 
 services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();

@@ -4,9 +4,9 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaAuth<TContext>(...)`
-- `AddAparesk.EskineriaPermissionAuthorization()`
-- `AddAparesk.EskineriaAuthControllers()`
+- `AddEskineriaAuth<TContext>(...)`
+- `AddEskineriaPermissionAuthorization()`
+- `AddEskineriaAuthControllers()`
 - `AuthController` ve `AccessControlController`
 - `IAuthService`, `IAccountService`, `ITokenService`, `ICurrentUserService`, `IAccessControlService`
 
@@ -48,12 +48,12 @@
 ## Register
 
 ```csharp
-services.AddAparesk.EskineriaAuth<ApplicationDbContext>(
+services.AddEskineriaAuth<ApplicationDbContext>(
     configuration,
     typeof(Program).Assembly);
 
 services.AddControllers()
-    .AddAparesk.EskineriaAuthControllers();
+    .AddEskineriaAuthControllers();
 ```
 
 ## Host Tarafi
@@ -86,7 +86,7 @@ public IActionResult SecureEndpoint() => Ok();
 
 ## Ne Zaman Tek Basina Yetmez
 
-Sadece `AddAparesk.EskineriaAuth` cagrisi login akisini ayaga kaldirir, ancak tam paket davranisi icin genelde su zincir de gerekir:
+Sadece `AddEskineriaAuth` cagrisi login akisini ayaga kaldirir, ancak tam paket davranisi icin genelde su zincir de gerekir:
 
 - notification provider
 - system settings service

@@ -27,7 +27,7 @@
 
 ## Register
 
-Bu paket icin su an tek bir `AddAparesk.EskineriaCompliance()` extension'i yok. Servis ve repository'ler explicit kaydedilir:
+Bu paket icin su an tek bir `AddEskineriaCompliance()` extension'i yok. Servis ve repository'ler explicit kaydedilir:
 
 ```csharp
 services.AddScoped<ITermsRepository, TermsRepository>();

@@ -4,8 +4,8 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaRepository()`
-- `AddAparesk.EskineriaRepository<TContext>()`
+- `AddEskineriaRepository()`
+- `AddEskineriaRepository<TContext>()`
 - `IRepository<TContext, TEntity>`
 - `IReadRepository<TContext, TEntity>`
 - specification ve paging altyapisi
@@ -23,7 +23,7 @@
 
 ```csharp
 services.AddDbContext<ApplicationDbContext>(...);
-services.AddAparesk.EskineriaRepository<ApplicationDbContext>(options =>
+services.AddEskineriaRepository<ApplicationDbContext>(options =>
 {
     options.AutoSave = false;
 });

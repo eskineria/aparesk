@@ -4,10 +4,10 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaVersioning(...)`
-- `AddAparesk.EskineriaUrlSegmentVersioning()`
-- `AddAparesk.EskineriaHeaderVersioning()`
-- `AddAparesk.EskineriaQueryStringVersioning()`
+- `AddEskineriaVersioning(...)`
+- `AddEskineriaUrlSegmentVersioning()`
+- `AddEskineriaHeaderVersioning()`
+- `AddEskineriaQueryStringVersioning()`
 - Header/query version token adlari icin guvenli karakter dogrulamasi
 
 ## Ic Paket Bagimliliklari
@@ -22,7 +22,7 @@
 ## Register
 
 ```csharp
-services.AddAparesk.EskineriaUrlSegmentVersioning();
+services.AddEskineriaUrlSegmentVersioning();
 ```
 
 ## Controller Ornegi

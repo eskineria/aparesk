@@ -4,7 +4,7 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaLocalization(...)`
+- `AddEskineriaLocalization(...)`
 - `AddJsonLocalization(...)`
 - `AddDatabaseLocalization(...)`
 - `LocalizationController`

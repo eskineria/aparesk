@@ -4,7 +4,7 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaValidation(assemblies)`
+- `AddEskineriaValidation(assemblies)`
 - `ValidationFilter`
 - automatic validator discovery
 - suppressed default model state filter
@@ -23,7 +23,7 @@
 ## Register
 
 ```csharp
-services.AddAparesk.EskineriaValidation(new[]
+services.AddEskineriaValidation(new[]
 {
     typeof(Program).Assembly,
     typeof(SomeCoreMarker).Assembly

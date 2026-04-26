@@ -4,8 +4,8 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaRateLimit(configuration)`
-- `AddAparesk.EskineriaRateLimit(options => ...)`
+- `AddEskineriaRateLimit(configuration)`
+- `AddEskineriaRateLimit(options => ...)`
 - global limiter
 - policy bazli limiter
 - reject response handler
@@ -18,7 +18,7 @@
 ## Register
 
 ```csharp
-services.AddAparesk.EskineriaRateLimit(configuration);
+services.AddEskineriaRateLimit(configuration);
 ```
 
 ```csharp

@@ -18,7 +18,7 @@ External gereksinimler:
 ## Hizli Kurulum
 
 ```csharp
-services.AddAparesk.EskineriaStorage(options =>
+services.AddEskineriaStorage(options =>
 {
     options.ProviderType = StorageProviderType.Local;
     options.Local.RootPath = "wwwroot/uploads";
@@ -30,7 +30,7 @@ services.AddAparesk.EskineriaStorage(options =>
 
 - `Abstractions/IStorageService.cs`: Tum provider'larin uymasi gereken ortak depolama sozlesmesi.
 - `Configuration/StorageOptions.cs`: Provider secimi ve provider bazli ayarlar.
-- `Extensions/ServiceCollectionExtensions.cs`: DI kaydi (`AddAparesk.EskineriaStorage`).
+- `Extensions/ServiceCollectionExtensions.cs`: DI kaydi (`AddEskineriaStorage`).
 - `Security/FileSecurityProvider.cs`: Dosya/folder sanitization + boyut/uzanti + magic-byte dogrulamasi.
 - `Implementations/EnhancedLocalStorageService.cs`: Varsayilan local provider.
 - `Implementations/S3StorageService.cs`: AWS S3 / S3-compatible provider.
@@ -54,7 +54,7 @@ Provider secimi runtime'da `StorageOptions.ProviderType` ile yapilir. Tum provid
 
 Kayit noktasi:
 
-- `Aparesk.Eskineria.Application/ServiceCollectionExtensions.cs` icinde `services.AddAparesk.EskineriaStorage(...)` cagrilir.
+- `Aparesk.Eskineria.Application/ServiceCollectionExtensions.cs` icinde `services.AddEskineriaStorage(...)` cagrilir.
 - Konfigurasyon `Storage` section'undan bind edilir.
 - Ayrica `Storage:Provider` degeri manuel parse edilerek `ProviderType` belirlenir.
 

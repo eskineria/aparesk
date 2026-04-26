@@ -4,7 +4,7 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaMapping(params Assembly[] assemblies)`
+- `AddEskineriaMapping(params Assembly[] assemblies)`
 - `TypeAdapterConfig`
 - `IMapper`
 - assembly bazli `MappingProfile` taramasi (`IMapFrom<T>`)
@@ -20,7 +20,7 @@
 ## Register
 
 ```csharp
-services.AddAparesk.EskineriaMapping(
+services.AddEskineriaMapping(
     typeof(Program).Assembly,
     typeof(SomeCoreType).Assembly);
 ```

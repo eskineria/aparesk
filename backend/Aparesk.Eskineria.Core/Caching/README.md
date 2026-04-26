@@ -18,13 +18,13 @@ External gereksinimler:
 ## Hizli Kurulum
 
 ```csharp
-services.AddAparesk.EskineriaCaching(configuration);
+services.AddEskineriaCaching(configuration);
 ```
 
 veya
 
 ```csharp
-services.AddAparesk.EskineriaCaching(options =>
+services.AddEskineriaCaching(options =>
 {
     options.CacheType = CacheType.Hybrid;
     options.RedisConnectionString = "localhost:6379";
@@ -36,7 +36,7 @@ services.AddAparesk.EskineriaCaching(options =>
 
 - `Abstractions/ICacheService.cs`: Uygulamanin kullandigi ortak cache sozlesmesi.
 - `Configuration/CacheOptions.cs`: Cache tipi ve davranis ayarlari.
-- `Extensions/ServiceCollectionExtensions.cs`: DI kaydi (`AddAparesk.EskineriaCaching`).
+- `Extensions/ServiceCollectionExtensions.cs`: DI kaydi (`AddEskineriaCaching`).
 - `Implementations/MemoryCacheService.cs`: `IMemoryCache` tabanli in-memory cache.
 - `Implementations/RedisCacheService.cs`: Redis tabanli distributed cache.
 - `Implementations/HybridCacheService.cs`: Redis-first, in-memory fallback cache.
@@ -58,7 +58,7 @@ Uygulama kodu dogrudan `IMemoryCache` veya Redis kullanmaz; bunun yerine `ICache
 
 Kayit noktasi:
 
-- `Aparesk.Eskineria.Application/ServiceCollectionExtensions.cs` icinde `services.AddAparesk.EskineriaCaching(configuration)` cagrilir.
+- `Aparesk.Eskineria.Application/ServiceCollectionExtensions.cs` icinde `services.AddEskineriaCaching(configuration)` cagrilir.
 - Bu cagri, varsayilan olarak `Caching` section'ini bind eder.
 
 DI secimi:

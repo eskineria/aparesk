@@ -4,8 +4,8 @@
 
 ## Neler Saglar
 
-- `AddAparesk.EskineriaLogging(...)`
-- `UseAparesk.EskineriaLogging()`
+- `AddEskineriaLogging(...)`
+- `UseEskineriaLogging()`
 - `CorrelationIdMiddleware`
 - `RequestResponseLoggingMiddleware`
 - Serilog ve opsiyonel Kafka sink konfigurasyonu
@@ -24,11 +24,11 @@
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
-builder.AddAparesk.EskineriaLogging();
+builder.AddEskineriaLogging();
 ```
 
 ```csharp
-app.UseAparesk.EskineriaLogging();
+app.UseEskineriaLogging();
 ```
 
 ## Kullanim Notlari
