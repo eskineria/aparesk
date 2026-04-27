@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -20,6 +20,10 @@ import EmailTemplates from '@/pages/EmailTemplates'
 import AuditLogs from '@/pages/AuditLogs'
 import EmailDeliveryLogs from '@/pages/EmailDeliveryLogs'
 import ComplianceTerms from '@/pages/ComplianceTerms'
+import SitesPage from '@/pages/property-management/SitesPage'
+import BlocksPage from '@/pages/property-management/BlocksPage'
+import UnitsPage from '@/pages/property-management/UnitsPage'
+import ResidentsPage from '@/pages/property-management/ResidentsPage'
 
 import Error500 from '@/pages/error/Error500'
 import Error404 from '@/pages/error/Error404'
@@ -151,6 +155,11 @@ function App() {
           <Route path="/admin/audit-logs" element={<ProtectedRoute permission="Audit.Read"><AuditLogs /></ProtectedRoute>} />
           <Route path="/admin/email-delivery-logs" element={<ProtectedRoute permission="Email.Read"><EmailDeliveryLogs /></ProtectedRoute>} />
           <Route path="/admin/compliance-terms" element={<ProtectedRoute permission="Compliance.Read"><ComplianceTerms /></ProtectedRoute>} />
+          <Route path="/management/properties/sites" element={<ProtectedRoute permission="Sites.Read"><SitesPage /></ProtectedRoute>} />
+          <Route path="/management/properties/blocks" element={<ProtectedRoute permission="Blocks.Read"><BlocksPage /></ProtectedRoute>} />
+          <Route path="/management/properties/units" element={<ProtectedRoute permission="Units.Read"><UnitsPage /></ProtectedRoute>} />
+          <Route path="/management/properties/residents" element={<ProtectedRoute permission="Residents.Read"><ResidentsPage /></ProtectedRoute>} />
+          <Route path="/management/properties" element={<Navigate to="/management/properties/sites" replace />} />
 
           {/* Error Pages */}
           <Route path="/error/401" element={<Error401 />} />

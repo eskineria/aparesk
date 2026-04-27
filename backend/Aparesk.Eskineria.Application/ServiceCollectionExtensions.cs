@@ -1,4 +1,6 @@
 using System.Reflection;
+using Aparesk.Eskineria.Application.Features.Management.Abstractions;
+using Aparesk.Eskineria.Application.Features.Management.Services;
 using Aparesk.Eskineria.Application.Features.Products.Abstractions;
 using Aparesk.Eskineria.Application.Features.Products.Services;
 using Aparesk.Eskineria.Core.Auth.Services;
@@ -49,6 +51,10 @@ public static class ServiceCollectionExtensions
             }
         });
 
+        services.AddScoped<ISiteService, SiteService>();
+        services.AddScoped<IBlockService, BlockService>();
+        services.AddScoped<IUnitService, UnitService>();
+        services.AddScoped<IResidentService, ResidentService>();
         services.AddScoped<IProductService, ProductService>();
 
         return services;

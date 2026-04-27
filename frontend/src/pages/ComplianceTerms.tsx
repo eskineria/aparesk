@@ -627,7 +627,7 @@ const ComplianceTerms = () => {
                                             <Nav variant="pills" activeKey={formCulture} onSelect={(k) => k && setFormCulture(k)}>
                                                 {cultures.map((c) => (
                                                     <Nav.Item key={c.code}>
-                                                        <Nav.Link eventKey={c.code} size="sm">
+                                                        <Nav.Link eventKey={c.code}>
                                                             {c.name}
                                                         </Nav.Link>
                                                     </Nav.Item>

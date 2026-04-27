@@ -23,4 +23,14 @@ public static class Permissions
     public const string AuditRead = "Audit.Read";
     public const string EmailRead = "Email.Read";
     public const string EmailManage = "Email.Manage";
+
+    // Management Permissions
+    public const string SitesRead = "Sites.Read";
+    public const string SitesManage = "Sites.Manage";
+    public const string BlocksRead = "Blocks.Read";
+    public const string BlocksManage = "Blocks.Manage";
+    public const string UnitsRead = "Units.Read";
+    public const string UnitsManage = "Units.Manage";
+    public const string ResidentsRead = "Residents.Read";
+    public const string ResidentsManage = "Residents.Manage";
 }

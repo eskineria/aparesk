@@ -29,6 +29,10 @@ public class ApplicationDbContext : EskineriaIdentityDbContext
     public DbSet<Setting> Settings { get; set; }
     public DbSet<LanguageResource> LanguageResources { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<Site> Sites { get; set; }
+    public DbSet<SiteBlock> SiteBlocks { get; set; }
+    public DbSet<Unit> Units { get; set; }
+    public DbSet<SiteResident> SiteResidents { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

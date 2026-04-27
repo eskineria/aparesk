@@ -27,6 +27,8 @@ using Aparesk.Eskineria.Core.Notifications.Email;
 using Aparesk.Eskineria.Core.Notifications.Abstractions;
 using Aparesk.Eskineria.Core.Notifications.Providers;
 using Aparesk.Eskineria.Core.Repository.Extensions;
+using Aparesk.Eskineria.Persistence.Features.Management.Abstractions;
+using Aparesk.Eskineria.Persistence.Features.Management.Repositories;
 using Aparesk.Eskineria.Persistence.Features.Products.Abstractions;
 using Aparesk.Eskineria.Persistence.Features.Products.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +89,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISystemSettingsService, SystemSettingsService>();
         services.AddScoped<SystemSettingsSeedService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<ISiteRepository, SiteRepository>();
+        services.AddScoped<ISiteBlockRepository, SiteBlockRepository>();
+        services.AddScoped<IUnitRepository, UnitRepository>();
+        services.AddScoped<ISiteResidentRepository, SiteResidentRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
 
         return services;

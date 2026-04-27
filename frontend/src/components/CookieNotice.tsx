@@ -6,7 +6,7 @@ import { ComplianceService } from '@/services/complianceService'
 import type { TermsDto } from '@/types/compliance'
 
 const CookieNotice = () => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const [cookiePolicy, setCookiePolicy] = useState<TermsDto | null>(null)
     const [isVisible, setIsVisible] = useState(false)
     const [showModal, setShowModal] = useState(false)
@@ -51,9 +51,17 @@ const CookieNotice = () => {
         setShowModal(false)
     }
 
+    const getLocalizedValue = (record: Record<string, string> | null | undefined, culture: string) => {
+        if (!record) return ''
+        return record[culture] || record['en-US'] || record['tr-TR'] || Object.values(record).find(v => !!v) || ''
+    }
+
     if (!cookiePolicy || !isVisible) {
         return null
     }
+
+    const currentSummary = getLocalizedValue(cookiePolicy.summary, i18n.language) || t('cookieNotice.message')
+    const currentContent = getLocalizedValue(cookiePolicy.content, i18n.language)
 
     return (
         <>
@@ -66,7 +74,7 @@ const CookieNotice = () => {
                         <div className="flex-grow-1">
                             <div className="fw-semibold mb-1">{t('cookieNotice.title')}</div>
                             <div className="text-muted small">
-                                {cookiePolicy.summary || t('cookieNotice.message')}
+                                {currentSummary}
                             </div>
                         </div>
                         <div className="d-flex flex-wrap gap-2">
@@ -87,7 +95,7 @@ const CookieNotice = () => {
                 </Modal.Header>
                 <Modal.Body style={{ maxHeight: '60vh', overflowY: 'auto' }} className="p-4">
                     <div className="terms-content">
-                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(cookiePolicy.content) }} />
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentContent) }} />
                         <div className="mt-3 text-muted small">
                             {t('cookieNotice.version')}: {cookiePolicy.version} | {t('cookieNotice.effectiveDate')}:{' '}
                             {new Date(cookiePolicy.effectiveDate).toLocaleDateString()}

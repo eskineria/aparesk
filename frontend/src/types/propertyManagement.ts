@@ -1,0 +1,190 @@
+export type PagedResult<T> = {
+    items: T[]
+    totalCount: number
+    pageNumber: number
+    pageSize: number
+    totalPages: number
+}
+
+export type PagedRequest = {
+    pageNumber: number
+    pageSize: number
+    searchTerm?: string
+    isActive?: boolean
+    includeArchived?: boolean
+}
+
+export type SiteListItem = {
+    id: string
+    name: string
+    city?: string | null
+    district?: string | null
+    isActive: boolean
+    isArchived: boolean
+    blockCount: number
+    unitCount: number
+    updatedAtUtc: string
+}
+
+export type SiteDetail = SiteListItem & {
+    taxNumber?: string | null
+    taxOffice?: string | null
+    phone?: string | null
+    email?: string | null
+    addressLine?: string | null
+    postalCode?: string | null
+    createdAtUtc: string
+    archivedAtUtc?: string | null
+}
+
+export type SitePayload = {
+    name: string
+    taxNumber?: string | null
+    taxOffice?: string | null
+    phone?: string | null
+    email?: string | null
+    addressLine?: string | null
+    district?: string | null
+    city?: string | null
+    postalCode?: string | null
+    isActive: boolean
+}
+
+export type BlockListItem = {
+    id: string
+    siteId: string
+    siteName: string
+    name: string
+    floorCount?: number | null
+    isActive: boolean
+    isArchived: boolean
+    unitCount: number
+    updatedAtUtc: string
+}
+
+export type BlockDetail = BlockListItem & {
+    description?: string | null
+    createdAtUtc: string
+    archivedAtUtc?: string | null
+}
+
+export type BlockPayload = {
+    siteId: string
+    name: string
+    floorCount?: number | null
+    unitsPerFloor?: number | null
+    description?: string | null
+    isActive: boolean
+}
+
+export const UnitType = {
+    Apartment: 1,
+    Shop: 2,
+    Office: 3,
+    Storage: 4,
+    Parking: 5,
+    CommonArea: 6,
+    Other: 99,
+} as const
+
+export type UnitType = typeof UnitType[keyof typeof UnitType]
+
+export type UnitListItem = {
+    id: string
+    siteId: string
+    siteName: string
+    siteBlockId?: string | null
+    blockName?: string | null
+    number: string
+    doorNumber?: string | null
+    type: UnitType
+    floorNumber?: number | null
+    grossAreaSquareMeters?: number | null
+    netAreaSquareMeters?: number | null
+    landShare?: number | null
+    isActive: boolean
+    isArchived: boolean
+    updatedAtUtc: string
+}
+
+export type UnitDetail = UnitListItem & {
+    notes?: string | null
+    createdAtUtc: string
+    archivedAtUtc?: string | null
+}
+
+export type UnitPayload = {
+    siteId: string
+    siteBlockId?: string | null
+    number: string
+    doorNumber?: string | null
+    type: UnitType
+    floorNumber?: number | null
+    grossAreaSquareMeters?: number | null
+    netAreaSquareMeters?: number | null
+    landShare?: number | null
+    notes?: string | null
+    isActive: boolean
+}
+
+export const ResidentType = {
+    Owner: 1,
+    Tenant: 2,
+    FamilyMember: 3,
+    AuthorizedPerson: 4,
+    Other: 99,
+} as const
+
+export type ResidentType = typeof ResidentType[keyof typeof ResidentType]
+
+export type ResidentListItem = {
+    id: string
+    siteId: string
+    siteName: string
+    unitId?: string | null
+    unitNumber?: string | null
+    blockName?: string | null
+    firstName: string
+    lastName: string
+    fullName: string
+    type: ResidentType
+    phone?: string | null
+    email?: string | null
+    moveInDate?: string | null
+    moveOutDate?: string | null
+    isActive: boolean
+    isArchived: boolean
+    updatedAtUtc: string
+}
+
+export type ResidentDetail = ResidentListItem & {
+    identityNumber?: string | null
+    occupation?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    kvkkConsentGiven: boolean
+    communicationConsentGiven: boolean
+    notes?: string | null
+    createdAtUtc: string
+    archivedAtUtc?: string | null
+}
+
+export type ResidentPayload = {
+    siteId: string
+    unitId?: string | null
+    firstName: string
+    lastName: string
+    identityNumber?: string | null
+    type: ResidentType
+    phone?: string | null
+    email?: string | null
+    occupation?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    moveInDate?: string | null
+    moveOutDate?: string | null
+    kvkkConsentGiven: boolean
+    communicationConsentGiven: boolean
+    notes?: string | null
+    isActive: boolean
+}

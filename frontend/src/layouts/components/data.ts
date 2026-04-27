@@ -10,6 +10,10 @@ import {
     TbSend,
     TbUsers,
     TbFileDescription,
+    TbHome,
+    TbBuildingCommunity,
+    TbBuilding,
+    TbLayoutGrid,
 } from 'react-icons/tb'
 import {
     LuCircleGauge,
@@ -55,6 +59,18 @@ export const menuItems: MenuItemType[] = [
         url: '/dashboard',
     },
     { key: 'apps', label: '', labelKey: 'menu.apps', isTitle: true },
+    {
+        key: 'property-management',
+        label: '',
+        labelKey: 'propertyManagement.title',
+        icon: TbHome,
+        children: [
+            { key: 'sites', label: '', labelKey: 'propertyManagement.tabs.sites', url: '/management/properties/sites', permission: 'Sites.Read', icon: TbBuildingCommunity },
+            { key: 'blocks', label: '', labelKey: 'propertyManagement.tabs.blocks', url: '/management/properties/blocks', permission: 'Blocks.Read', icon: TbBuilding },
+            { key: 'units', label: '', labelKey: 'propertyManagement.tabs.units', url: '/management/properties/units', permission: 'Units.Read', icon: TbLayoutGrid },
+            { key: 'residents', label: '', labelKey: 'propertyManagement.tabs.residents', url: '/management/properties/residents', permission: 'Residents.Read', icon: TbUsers },
+        ],
+    },
     {
         key: 'localization-mgmt',
         label: '',

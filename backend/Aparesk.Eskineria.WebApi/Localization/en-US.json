@@ -217,6 +217,7 @@
     "Length": "The {0} field has an invalid length.",
     "GreaterThan": "The {0} field must be greater than zero.",
     "GreaterThanOrEqualTo": "The {0} field must be greater than or equal to zero.",
+    "InvalidEmail": "The {0} field must be a valid email address.",
     "InclusiveBetween": "The {0} field is outside the allowed range.",
     "LessThanOrEqualTo": "The {0} field must be less than or equal to the allowed maximum.",
     "NotEqual": "The {0} field has an invalid value.",
@@ -473,5 +474,11 @@
     "AccountLockedReasonText": "Your account has been locked for {0} minutes.",
     "AccountLockedActionText": "If this was not you, we recommend resetting your password to secure your account.",
     "AccountLockedEmailSubject": "Your account has been locked",
-    "AccountLockedEmailFallback": "Your account has been locked for {0} minutes."
+    "AccountLockedEmailFallback": "Your account has been locked for {0} minutes.",
+    "identity.groups.Blocks": "Block Management",
+    "identity.names.Blocks.Manage": "Manage Blocks",
+    "identity.names.Blocks.Read": "Read Blocks",
+    "identity.groups.Residents": "Resident Management",
+    "identity.names.Residents.Manage": "Manage Residents",
+    "identity.names.Residents.Read": "Read Residents"
 }

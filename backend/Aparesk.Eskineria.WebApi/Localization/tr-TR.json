@@ -217,6 +217,7 @@
     "Length": "{0} alanının uzunluğu geçersiz.",
     "GreaterThan": "{0} alanı sıfırdan büyük olmalıdır.",
     "GreaterThanOrEqualTo": "{0} alanı sıfır veya daha büyük olmalıdır.",
+    "InvalidEmail": "{0} alanı geçerli bir e-posta adresi olmalıdır.",
     "InclusiveBetween": "{0} alanı izin verilen aralığın dışındadır.",
     "LessThanOrEqualTo": "{0} alanı izin verilen maksimum değerden büyük olamaz.",
     "NotEqual": "{0} alanı geçersiz bir değere sahip.",
@@ -473,5 +474,11 @@
     "AccountLockedReasonText": "Hesabınız {0} dakika boyunca kilitlenmiştir.",
     "AccountLockedActionText": "Eğer bu denemeleri siz yapmadıysanız, hesabınızı güvenceye almak için şifrenizi sıfırlamanızı öneririz.",
     "AccountLockedEmailSubject": "Hesabınız kilitlendi",
-    "AccountLockedEmailFallback": "Hesabınız {0} dakika boyunca kilitlendi."
+    "AccountLockedEmailFallback": "Hesabınız {0} dakika boyunca kilitlendi.",
+    "identity.groups.Blocks": "Blok Yönetimi",
+    "identity.names.Blocks.Manage": "Blokları Yönet",
+    "identity.names.Blocks.Read": "Blokları Görüntüle",
+    "identity.groups.Residents": "Site Sakini Yönetimi",
+    "identity.names.Residents.Manage": "Site Sakinlerini Yönet",
+    "identity.names.Residents.Read": "Site Sakinlerini Görüntüle"
 }
