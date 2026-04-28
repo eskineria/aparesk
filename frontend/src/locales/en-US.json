@@ -283,7 +283,8 @@
         "role_switch_failed": "Role switch failed",
         "pagination": {
             "showing": "Showing {{start}} to {{end}} of {{total}} entries"
-        }
+        },
+        "no_records_found": "No records found"
     },
     "error": {
         "401": {
@@ -1313,7 +1314,8 @@
             "addResident": "Add Resident",
             "search": "Search",
             "edit": "Edit",
-            "archive": "Archive"
+            "archive": "Archive",
+            "manageHousehold": "Manage Household"
         },
         "status": {
             "active": "Active",
@@ -1363,7 +1365,13 @@
             "type": "Type",
             "unit": "Unit",
             "unitNumber": "Unit No",
-            "unitsPerFloor": "Units per Floor"
+            "unitsPerFloor": "Units per Floor",
+            "ownerFirstName": "Owner First Name",
+            "ownerLastName": "Owner Last Name",
+            "ownerPhone": "Owner Phone",
+            "ownerInfo": "Owner Information",
+            "relationship": "Relationship",
+            "householdMembers": "Household Members"
         },
         "modals": {
             "addSite": "Add Site",
@@ -1373,7 +1381,8 @@
             "addUnit": "Add Unit",
             "editUnit": "Edit Unit",
             "addResident": "Add Resident",
-            "editResident": "Edit Resident"
+            "editResident": "Edit Resident",
+            "householdMembers": "Household Members"
         },
         "unitTypes": {
             "1": "Apartment",

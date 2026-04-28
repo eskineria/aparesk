@@ -14,8 +14,6 @@ public sealed class UpdateResidentRequestValidator : AbstractValidator<UpdateRes
         RuleFor(x => x.Phone).MaximumLength(32).WithMessage("MaxLength");
         RuleFor(x => x.Email).MaximumLength(256).WithMessage("MaxLength").EmailAddress().WithMessage("InvalidEmail").When(x => !string.IsNullOrWhiteSpace(x.Email));
         RuleFor(x => x.Occupation).MaximumLength(150).WithMessage("MaxLength");
-        RuleFor(x => x.EmergencyContactName).MaximumLength(200).WithMessage("MaxLength");
-        RuleFor(x => x.EmergencyContactPhone).MaximumLength(32).WithMessage("MaxLength");
         RuleFor(x => x.Notes).MaximumLength(1000).WithMessage("MaxLength");
         RuleFor(x => x.MoveOutDate)
             .GreaterThanOrEqualTo(x => x.MoveInDate)

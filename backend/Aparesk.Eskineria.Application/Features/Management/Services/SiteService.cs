@@ -6,6 +6,7 @@ using Aparesk.Eskineria.Core.Repository.Paging;
 using Aparesk.Eskineria.Core.Shared.Response;
 using Aparesk.Eskineria.Domain.Entities;
 using Aparesk.Eskineria.Persistence.Features.Management.Abstractions;
+using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,11 +16,13 @@ public sealed class SiteService : ISiteService
 {
     private readonly ISiteRepository _siteRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IStringLocalizer<SiteService> _localizer;
 
-    public SiteService(ISiteRepository siteRepository, ICurrentUserService currentUserService)
+    public SiteService(ISiteRepository siteRepository, ICurrentUserService currentUserService, IStringLocalizer<SiteService> localizer)
     {
         _siteRepository = siteRepository;
         _currentUserService = currentUserService;
+        _localizer = localizer;
     }
 
     public async Task<PagedResponse<SiteListItemDto>> GetPagedAsync(GetSitesRequest request, CancellationToken cancellationToken = default)
@@ -79,7 +82,7 @@ public sealed class SiteService : ISiteService
 
         await _siteRepository.AddAsync(site, cancellationToken);
         await _siteRepository.SaveChangesAsync(cancellationToken);
-        return DataResponse<SiteDetailDto>.Succeed(MapDetail(site), "Site created successfully.", StatusCodes.Status201Created);
+        return DataResponse<SiteDetailDto>.Succeed(MapDetail(site), _localizer["SiteCreatedSuccessfully"].Value, StatusCodes.Status201Created);
     }
 
     public async Task<DataResponse<SiteDetailDto>> UpdateAsync(Guid id, UpdateSiteRequest request, CancellationToken cancellationToken = default)
@@ -100,7 +103,7 @@ public sealed class SiteService : ISiteService
         site.UpdatedByUserId = _currentUserService.UserId;
 
         await _siteRepository.SaveChangesAsync(cancellationToken);
-        return DataResponse<SiteDetailDto>.Succeed(MapDetail(site), "Site updated successfully.");
+        return DataResponse<SiteDetailDto>.Succeed(MapDetail(site), _localizer["SiteUpdatedSuccessfully"].Value);
     }
 
     public async Task<Response> ArchiveAsync(Guid id, CancellationToken cancellationToken = default)
@@ -113,7 +116,7 @@ public sealed class SiteService : ISiteService
         site.UpdatedByUserId = _currentUserService.UserId;
 
         await _siteRepository.SaveChangesAsync(cancellationToken);
-        return Response.Succeed("Site archived successfully.");
+        return Response.Succeed(_localizer["SiteArchivedSuccessfully"].Value);
     }
 
     private async Task<Site> GetTrackedSiteAsync(Guid id, bool asNoTracking, CancellationToken cancellationToken)
@@ -123,7 +126,7 @@ public sealed class SiteService : ISiteService
             .Include(entity => entity.Units)
             .FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
 
-        return site ?? throw new KeyNotFoundException("Site not found.");
+        return site ?? throw new KeyNotFoundException(_localizer["SiteNotFound"].Value);
     }
 
     private async Task<string> GenerateUniqueCodeAsync(string name, CancellationToken cancellationToken)

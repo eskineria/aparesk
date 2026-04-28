@@ -14,8 +14,6 @@ public class SiteResident
     public string? Phone { get; set; }
     public string? Email { get; set; }
     public string? Occupation { get; set; }
-    public string? EmergencyContactName { get; set; }
-    public string? EmergencyContactPhone { get; set; }
     public DateOnly? MoveInDate { get; set; }
     public DateOnly? MoveOutDate { get; set; }
     public bool KvkkConsentGiven { get; set; }
@@ -29,6 +27,17 @@ public class SiteResident
     public Guid? CreatedByUserId { get; set; }
     public Guid? UpdatedByUserId { get; set; }
 
+    public string? OwnerFirstName { get; set; }
+    public string? OwnerLastName { get; set; }
+    public string? OwnerPhone { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
     public Site Site { get; set; } = null!;
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
     public Unit? Unit { get; set; }
+
+    public ICollection<HouseholdMember> HouseholdMembers { get; set; } = new List<HouseholdMember>();
 }

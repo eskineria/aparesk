@@ -1,3 +1,4 @@
+using Aparesk.Eskineria.Core.Auth.Utilities;
 using Aparesk.Eskineria.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,13 +14,33 @@ public sealed class SiteResidentConfiguration : IEntityTypeConfiguration<SiteRes
 
         builder.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
         builder.Property(e => e.LastName).IsRequired().HasMaxLength(100);
-        builder.Property(e => e.IdentityNumber).HasMaxLength(32);
+        builder.Property(e => e.IdentityNumber)
+            .HasMaxLength(500)
+            .HasConversion(
+                v => AuthSensitiveDataProtector.Encrypt(v),
+                v => AuthSensitiveDataProtector.Decrypt(v));
+                
         builder.Property(e => e.Type).IsRequired().HasConversion<int>();
-        builder.Property(e => e.Phone).HasMaxLength(32);
-        builder.Property(e => e.Email).HasMaxLength(256);
+        
+        builder.Property(e => e.Phone)
+            .HasMaxLength(500)
+            .HasConversion(
+                v => AuthSensitiveDataProtector.Encrypt(v),
+                v => AuthSensitiveDataProtector.Decrypt(v));
+                
+        builder.Property(e => e.Email)
+            .HasMaxLength(500)
+            .HasConversion(
+                v => AuthSensitiveDataProtector.Encrypt(v),
+                v => AuthSensitiveDataProtector.Decrypt(v));
+                
+        builder.Property(e => e.OwnerPhone)
+            .HasMaxLength(500)
+            .HasConversion(
+                v => AuthSensitiveDataProtector.Encrypt(v),
+                v => AuthSensitiveDataProtector.Decrypt(v));
+
         builder.Property(e => e.Occupation).HasMaxLength(150);
-        builder.Property(e => e.EmergencyContactName).HasMaxLength(200);
-        builder.Property(e => e.EmergencyContactPhone).HasMaxLength(32);
         builder.Property(e => e.MoveInDate).HasColumnType("date");
         builder.Property(e => e.MoveOutDate).HasColumnType("date");
         builder.Property(e => e.Notes).HasMaxLength(1000);
@@ -41,6 +62,5 @@ public sealed class SiteResidentConfiguration : IEntityTypeConfiguration<SiteRes
         builder.HasIndex(e => new { e.SiteId, e.LastName, e.FirstName });
         builder.HasIndex(e => new { e.SiteId, e.UnitId, e.IsArchived, e.IsActive });
         builder.HasIndex(e => new { e.SiteId, e.Type, e.IsArchived });
-        builder.HasIndex(e => e.IdentityNumber);
     }
 }

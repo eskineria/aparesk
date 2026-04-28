@@ -744,6 +744,44 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                     b.ToTable("Settings");
                 });
 
+            modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.HouseholdMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("IdentityNumber")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Relationship")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("ResidentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResidentId");
+
+                    b.ToTable("HouseholdMembers", (string)null);
+                });
+
             modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -971,16 +1009,8 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("EmergencyContactName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("EmergencyContactPhone")
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -988,8 +1018,8 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("IdentityNumber")
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -1019,9 +1049,19 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<string>("OwnerFirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OwnerLastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OwnerPhone")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Phone")
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("SiteId")
                         .HasColumnType("uniqueidentifier");
@@ -1039,8 +1079,6 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("IdentityNumber");
 
                     b.HasIndex("UnitId");
 
@@ -1267,6 +1305,17 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                     b.Navigation("EmailTemplate");
                 });
 
+            modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.HouseholdMember", b =>
+                {
+                    b.HasOne("Aparesk.Eskineria.Domain.Entities.SiteResident", "Resident")
+                        .WithMany("HouseholdMembers")
+                        .HasForeignKey("ResidentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resident");
+                });
+
             modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.SiteBlock", b =>
                 {
                     b.HasOne("Aparesk.Eskineria.Domain.Entities.Site", "Site")
@@ -1276,24 +1325,6 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Site");
-                });
-
-            modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.Unit", b =>
-                {
-                    b.HasOne("Aparesk.Eskineria.Domain.Entities.SiteBlock", "SiteBlock")
-                        .WithMany("Units")
-                        .HasForeignKey("SiteBlockId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Aparesk.Eskineria.Domain.Entities.Site", "Site")
-                        .WithMany("Units")
-                        .HasForeignKey("SiteId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Site");
-
-                    b.Navigation("SiteBlock");
                 });
 
             modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.SiteResident", b =>
@@ -1312,6 +1343,24 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                     b.Navigation("Site");
 
                     b.Navigation("Unit");
+                });
+
+            modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.Unit", b =>
+                {
+                    b.HasOne("Aparesk.Eskineria.Domain.Entities.SiteBlock", "SiteBlock")
+                        .WithMany("Units")
+                        .HasForeignKey("SiteBlockId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Aparesk.Eskineria.Domain.Entities.Site", "Site")
+                        .WithMany("Units")
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Site");
+
+                    b.Navigation("SiteBlock");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1387,6 +1436,11 @@ namespace Aparesk.Eskineria.Persistence.Migrations
             modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.SiteBlock", b =>
                 {
                     b.Navigation("Units");
+                });
+
+            modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.SiteResident", b =>
+                {
+                    b.Navigation("HouseholdMembers");
                 });
 
             modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.Unit", b =>

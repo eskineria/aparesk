@@ -22,7 +22,15 @@ public class Site
     public Guid? CreatedByUserId { get; set; }
     public Guid? UpdatedByUserId { get; set; }
 
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
     public ICollection<SiteBlock> Blocks { get; set; } = new List<SiteBlock>();
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
     public ICollection<Unit> Units { get; set; } = new List<Unit>();
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
     public ICollection<SiteResident> Residents { get; set; } = new List<SiteResident>();
 }

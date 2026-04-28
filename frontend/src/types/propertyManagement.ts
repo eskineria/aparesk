@@ -160,13 +160,24 @@ export type ResidentListItem = {
 export type ResidentDetail = ResidentListItem & {
     identityNumber?: string | null
     occupation?: string | null
-    emergencyContactName?: string | null
-    emergencyContactPhone?: string | null
     kvkkConsentGiven: boolean
     communicationConsentGiven: boolean
     notes?: string | null
     createdAtUtc: string
     archivedAtUtc?: string | null
+    ownerFirstName?: string | null
+    ownerLastName?: string | null
+    ownerPhone?: string | null
+    householdMembers: HouseholdMember[]
+}
+
+export type HouseholdMember = {
+    id?: string
+    firstName: string
+    lastName: string
+    phone?: string | null
+    identityNumber?: string | null
+    relationship?: string | null
 }
 
 export type ResidentPayload = {
@@ -179,12 +190,14 @@ export type ResidentPayload = {
     phone?: string | null
     email?: string | null
     occupation?: string | null
-    emergencyContactName?: string | null
-    emergencyContactPhone?: string | null
     moveInDate?: string | null
     moveOutDate?: string | null
     kvkkConsentGiven: boolean
     communicationConsentGiven: boolean
     notes?: string | null
     isActive: boolean
+    ownerFirstName?: string | null
+    ownerLastName?: string | null
+    ownerPhone?: string | null
+    householdMembers: HouseholdMember[]
 }

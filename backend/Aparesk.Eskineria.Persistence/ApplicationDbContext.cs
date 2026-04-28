@@ -33,6 +33,7 @@ public class ApplicationDbContext : EskineriaIdentityDbContext
     public DbSet<SiteBlock> SiteBlocks { get; set; }
     public DbSet<Unit> Units { get; set; }
     public DbSet<SiteResident> SiteResidents { get; set; }
+    public DbSet<HouseholdMember> HouseholdMembers { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

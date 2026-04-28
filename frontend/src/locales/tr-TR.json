@@ -283,7 +283,8 @@
         "role_switch_failed": "Rol değiştirme başarısız",
         "pagination": {
             "showing": "Toplam {{total}} kayıttan {{start}} - {{end}} arası gösteriliyor"
-        }
+        },
+        "no_records_found": "Kayıt bulunamadı"
     },
     "error": {
         "401": {
@@ -1296,7 +1297,8 @@
             "addResident": "Sakin Ekle",
             "search": "Ara",
             "edit": "Düzenle",
-            "archive": "Arşivle"
+            "archive": "Arşivle",
+            "manageHousehold": "Ev Sakinlerini Yönet"
         },
         "status": {
             "active": "Aktif",
@@ -1346,7 +1348,13 @@
             "type": "Tip",
             "unit": "Daire",
             "unitNumber": "Daire No",
-            "unitsPerFloor": "Kattaki Daire Sayısı"
+            "unitsPerFloor": "Kattaki Daire Sayısı",
+            "ownerFirstName": "Ev Sahibi Adı",
+            "ownerLastName": "Ev Sahibi Soyadı",
+            "ownerPhone": "Ev Sahibi Telefonu",
+            "ownerInfo": "Ev Sahibi Bilgileri",
+            "relationship": "Yakınlık Derecesi",
+            "householdMembers": "Ev Sakinleri"
         },
         "modals": {
             "addSite": "Site Ekle",
@@ -1356,7 +1364,8 @@
             "addUnit": "Daire Ekle",
             "editUnit": "Daire Düzenle",
             "addResident": "Sakin Ekle",
-            "editResident": "Sakin Düzenle"
+            "editResident": "Sakin Düzenle",
+            "householdMembers": "Ev Sakinleri"
         },
         "unitTypes": {
             "1": "Daire",
@@ -1368,7 +1377,7 @@
             "99": "Diğer"
         },
         "residentTypes": {
-            "1": "Malik",
+            "1": "Ev Sahibi",
             "2": "Kiracı",
             "3": "Aile Bireyi",
             "4": "Yetkili Kişi",

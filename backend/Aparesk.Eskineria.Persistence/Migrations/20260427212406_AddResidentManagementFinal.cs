@@ -1,17 +1,18 @@
-using System;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Aparesk.Eskineria.Persistence.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260427231000_AddSiteResidentManagement")]
-    public partial class AddSiteResidentManagement : Migration
+    /// <inheritdoc />
+    public partial class AddResidentManagementFinal : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("IF OBJECT_ID('dbo.HouseholdMembers', 'U') IS NOT NULL DROP TABLE dbo.HouseholdMembers;");
+            migrationBuilder.Sql("IF OBJECT_ID('dbo.SiteResidents', 'U') IS NOT NULL DROP TABLE dbo.SiteResidents;");
+
             migrationBuilder.CreateTable(
                 name: "SiteResidents",
                 columns: table => new
@@ -35,6 +36,9 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                     Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsArchived = table.Column<bool>(type: "bit", nullable: false),
+                    OwnerFirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OwnerLastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OwnerPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ArchivedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -57,6 +61,34 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "HouseholdMembers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ResidentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    IdentityNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Relationship = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HouseholdMembers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_HouseholdMembers_SiteResidents_ResidentId",
+                        column: x => x.ResidentId,
+                        principalTable: "SiteResidents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HouseholdMembers_ResidentId",
+                table: "HouseholdMembers",
+                column: "ResidentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SiteResidents_IdentityNumber",
@@ -84,8 +116,12 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                 column: "UnitId");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "HouseholdMembers");
+
             migrationBuilder.DropTable(
                 name: "SiteResidents");
         }

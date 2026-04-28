@@ -7,6 +7,7 @@ using Aparesk.Eskineria.Core.Shared.Response;
 using Aparesk.Eskineria.Domain.Entities;
 using Aparesk.Eskineria.Domain.Enums;
 using Aparesk.Eskineria.Persistence.Features.Management.Abstractions;
+using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,15 +18,18 @@ public sealed class BlockService : IBlockService
     private readonly ISiteRepository _siteRepository;
     private readonly ISiteBlockRepository _blockRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IStringLocalizer<BlockService> _localizer;
 
     public BlockService(
         ISiteRepository siteRepository,
         ISiteBlockRepository blockRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IStringLocalizer<BlockService> localizer)
     {
         _siteRepository = siteRepository;
         _blockRepository = blockRepository;
         _currentUserService = currentUserService;
+        _localizer = localizer;
     }
 
     public async Task<PagedResponse<BlockListItemDto>> GetPagedAsync(GetBlocksRequest request, CancellationToken cancellationToken = default)
@@ -87,7 +91,7 @@ public sealed class BlockService : IBlockService
         await _blockRepository.SaveChangesAsync(cancellationToken);
 
         block = await GetTrackedBlockAsync(block.Id, asNoTracking: true, cancellationToken);
-        return DataResponse<BlockDetailDto>.Succeed(MapDetail(block), "Block created successfully.", StatusCodes.Status201Created);
+        return DataResponse<BlockDetailDto>.Succeed(MapDetail(block), _localizer["BlockCreatedSuccessfully"].Value, StatusCodes.Status201Created);
     }
 
     public async Task<DataResponse<BlockDetailDto>> UpdateAsync(Guid id, UpdateBlockRequest request, CancellationToken cancellationToken = default)
@@ -102,7 +106,7 @@ public sealed class BlockService : IBlockService
         block.UpdatedByUserId = _currentUserService.UserId;
 
         await _blockRepository.SaveChangesAsync(cancellationToken);
-        return DataResponse<BlockDetailDto>.Succeed(MapDetail(block), "Block updated successfully.");
+        return DataResponse<BlockDetailDto>.Succeed(MapDetail(block), _localizer["BlockUpdatedSuccessfully"].Value);
     }
 
     public async Task<Response> ArchiveAsync(Guid id, CancellationToken cancellationToken = default)
@@ -115,7 +119,7 @@ public sealed class BlockService : IBlockService
         block.UpdatedByUserId = _currentUserService.UserId;
 
         await _blockRepository.SaveChangesAsync(cancellationToken);
-        return Response.Succeed("Block archived successfully.");
+        return Response.Succeed(_localizer["BlockArchivedSuccessfully"].Value);
     }
 
     private async Task EnsureSiteExistsAsync(Guid siteId, CancellationToken cancellationToken)
@@ -124,7 +128,7 @@ public sealed class BlockService : IBlockService
             .AnyAsync(site => site.Id == siteId && !site.IsArchived, cancellationToken);
         if (!exists)
         {
-            throw new KeyNotFoundException("Site not found.");
+            throw new KeyNotFoundException(_localizer["SiteNotFound"].Value);
         }
     }
 
@@ -135,7 +139,7 @@ public sealed class BlockService : IBlockService
             .Include(entity => entity.Units)
             .FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
 
-        return block ?? throw new KeyNotFoundException("Block not found.");
+        return block ?? throw new KeyNotFoundException(_localizer["BlockNotFound"].Value);
     }
 
     private async Task<string> GenerateUniqueCodeAsync(Guid siteId, string name, CancellationToken cancellationToken)

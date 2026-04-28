@@ -6,6 +6,7 @@ using Aparesk.Eskineria.Core.Repository.Paging;
 using Aparesk.Eskineria.Core.Shared.Response;
 using Aparesk.Eskineria.Domain.Entities;
 using Aparesk.Eskineria.Persistence.Features.Management.Abstractions;
+using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,17 +18,20 @@ public sealed class UnitService : IUnitService
     private readonly ISiteBlockRepository _blockRepository;
     private readonly IUnitRepository _unitRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IStringLocalizer<UnitService> _localizer;
 
     public UnitService(
         ISiteRepository siteRepository,
         ISiteBlockRepository blockRepository,
         IUnitRepository unitRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IStringLocalizer<UnitService> localizer)
     {
         _siteRepository = siteRepository;
         _blockRepository = blockRepository;
         _unitRepository = unitRepository;
         _currentUserService = currentUserService;
+        _localizer = localizer;
     }
 
     public async Task<PagedResponse<UnitListItemDto>> GetPagedAsync(GetUnitsRequest request, CancellationToken cancellationToken = default)
@@ -100,7 +104,7 @@ public sealed class UnitService : IUnitService
         await _unitRepository.SaveChangesAsync(cancellationToken);
 
         unit = await GetTrackedUnitAsync(unit.Id, asNoTracking: true, cancellationToken);
-        return DataResponse<UnitDetailDto>.Succeed(MapDetail(unit), "Unit created successfully.", StatusCodes.Status201Created);
+        return DataResponse<UnitDetailDto>.Succeed(MapDetail(unit), _localizer["UnitCreatedSuccessfully"].Value, StatusCodes.Status201Created);
     }
 
     public async Task<DataResponse<UnitDetailDto>> UpdateAsync(Guid id, UpdateUnitRequest request, CancellationToken cancellationToken = default)
@@ -125,7 +129,7 @@ public sealed class UnitService : IUnitService
 
         await _unitRepository.SaveChangesAsync(cancellationToken);
         unit = await GetTrackedUnitAsync(id, asNoTracking: true, cancellationToken);
-        return DataResponse<UnitDetailDto>.Succeed(MapDetail(unit), "Unit updated successfully.");
+        return DataResponse<UnitDetailDto>.Succeed(MapDetail(unit), _localizer["UnitUpdatedSuccessfully"].Value);
     }
 
     public async Task<Response> ArchiveAsync(Guid id, CancellationToken cancellationToken = default)
@@ -138,7 +142,7 @@ public sealed class UnitService : IUnitService
         unit.UpdatedByUserId = _currentUserService.UserId;
 
         await _unitRepository.SaveChangesAsync(cancellationToken);
-        return Response.Succeed("Unit archived successfully.");
+        return Response.Succeed(_localizer["UnitArchivedSuccessfully"].Value);
     }
 
     private async Task EnsureSiteExistsAsync(Guid siteId, CancellationToken cancellationToken)
@@ -147,7 +151,7 @@ public sealed class UnitService : IUnitService
             .AnyAsync(site => site.Id == siteId && !site.IsArchived, cancellationToken);
         if (!exists)
         {
-            throw new KeyNotFoundException("Site not found.");
+            throw new KeyNotFoundException(_localizer["SiteNotFound"].Value);
         }
     }
 
@@ -162,7 +166,7 @@ public sealed class UnitService : IUnitService
             .AnyAsync(block => block.Id == blockId.Value && block.SiteId == siteId && !block.IsArchived, cancellationToken);
         if (!exists)
         {
-            throw new KeyNotFoundException("Block not found in this site.");
+            throw new KeyNotFoundException(_localizer["BlockNotFoundInSite"].Value);
         }
     }
 
@@ -173,7 +177,7 @@ public sealed class UnitService : IUnitService
             .Include(entity => entity.SiteBlock)
             .FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
 
-        return unit ?? throw new KeyNotFoundException("Unit not found.");
+        return unit ?? throw new KeyNotFoundException(_localizer["UnitNotFound"].Value);
     }
 
     private async Task EnsureNumberIsUniqueAsync(Guid siteId, Guid? blockId, string number, Guid? excludingId, CancellationToken cancellationToken)
@@ -187,7 +191,7 @@ public sealed class UnitService : IUnitService
                 cancellationToken);
         if (exists)
         {
-            throw new InvalidOperationException("Unit number already exists in this site/block.");
+            throw new InvalidOperationException(_localizer["UnitNumberAlreadyExists"].Value);
         }
     }
 
