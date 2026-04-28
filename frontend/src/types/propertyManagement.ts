@@ -201,3 +201,68 @@ export type ResidentPayload = {
     ownerPhone?: string | null
     householdMembers: HouseholdMember[]
 }
+
+export const MeetingType = {
+    Ordinary: 1,
+    Extraordinary: 2,
+} as const
+
+export type MeetingType = typeof MeetingType[keyof typeof MeetingType]
+
+export const BoardType = {
+    ManagementBoard: 1,
+    AuditBoard: 2,
+} as const
+
+export type BoardType = typeof BoardType[keyof typeof BoardType]
+
+export const BoardMemberType = {
+    Principal: 1,
+    Substitute: 2,
+} as const
+
+export type BoardMemberType = typeof BoardMemberType[keyof typeof BoardMemberType]
+
+export type GeneralAssemblyDecision = {
+    id?: string
+    decisionNumber: number
+    description: string
+}
+
+export type GeneralAssemblyBoardMember = {
+    id?: string
+    residentId: string
+    boardType: BoardType
+    memberType: BoardMemberType
+    title?: string | null
+    // View fields
+    residentName?: string
+}
+
+export type GeneralAssemblyListItem = {
+    id: string
+    siteId: string
+    siteName: string
+    meetingDate: string
+    term: string
+    type: MeetingType
+    isCompleted: boolean
+    updatedAtUtc: string
+}
+
+export type GeneralAssemblyDetail = GeneralAssemblyListItem & {
+    notes?: string | null
+    decisions: GeneralAssemblyDecision[]
+    boardMembers: GeneralAssemblyBoardMember[]
+}
+
+export type GeneralAssemblyPayload = {
+    siteId: string
+    meetingDate: string
+    term: string
+    type: MeetingType
+    isCompleted: boolean
+    notes?: string | null
+    decisions: GeneralAssemblyDecision[]
+    boardMembers: GeneralAssemblyBoardMember[]
+}

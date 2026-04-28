@@ -1288,7 +1288,8 @@
             "sites": "Siteler",
             "blocks": "Bloklar",
             "units": "Daireler",
-            "residents": "Site Sakinleri"
+            "residents": "Site Sakinleri",
+            "generalAssemblies": "Genel Kurul"
         },
         "actions": {
             "addSite": "Site Ekle",
@@ -1298,7 +1299,8 @@
             "search": "Ara",
             "edit": "Düzenle",
             "archive": "Arşivle",
-            "manageHousehold": "Ev Sakinlerini Yönet"
+            "manageHousehold": "Ev Sakinlerini Yönet",
+            "addGeneralAssembly": "Genel Kurul Ekle"
         },
         "status": {
             "active": "Aktif",
@@ -1365,7 +1367,9 @@
             "editUnit": "Daire Düzenle",
             "addResident": "Sakin Ekle",
             "editResident": "Sakin Düzenle",
-            "householdMembers": "Ev Sakinleri"
+            "householdMembers": "Ev Sakinleri",
+            "addGeneralAssembly": "Genel Kurul Ekle",
+            "editGeneralAssembly": "Genel Kurul Düzenle"
         },
         "unitTypes": {
             "1": "Daire",

@@ -24,6 +24,7 @@ import SitesPage from '@/pages/property-management/SitesPage'
 import BlocksPage from '@/pages/property-management/BlocksPage'
 import UnitsPage from '@/pages/property-management/UnitsPage'
 import ResidentsPage from '@/pages/property-management/ResidentsPage'
+import GeneralAssembliesPage from '@/pages/property-management/GeneralAssembliesPage'
 
 import Error500 from '@/pages/error/Error500'
 import Error404 from '@/pages/error/Error404'
@@ -159,6 +160,7 @@ function App() {
           <Route path="/management/properties/blocks" element={<ProtectedRoute permission="Blocks.Read"><BlocksPage /></ProtectedRoute>} />
           <Route path="/management/properties/units" element={<ProtectedRoute permission="Units.Read"><UnitsPage /></ProtectedRoute>} />
           <Route path="/management/properties/residents" element={<ProtectedRoute permission="Residents.Read"><ResidentsPage /></ProtectedRoute>} />
+          <Route path="/management/properties/general-assemblies" element={<ProtectedRoute permission="Sites.Read"><GeneralAssembliesPage /></ProtectedRoute>} />
           <Route path="/management/properties" element={<Navigate to="/management/properties/sites" replace />} />
 
           {/* Error Pages */}
