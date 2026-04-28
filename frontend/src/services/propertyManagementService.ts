@@ -119,43 +119,24 @@ export const PropertyManagementService = {
         return response.data.data
     },
     getGeneralAssemblies: async (params: PagedRequest & { siteId?: string }) => {
-        // Mock implementation for now
-        const items = JSON.parse(localStorage.getItem('mockGeneralAssemblies') || '[]')
-        return { items, totalCount: items.length, pageNumber: 1, pageSize: 10, totalPages: 1 } as PagedResult<any>
+        const response = await api.get<BackendPagedResponse<any>>('/GeneralAssemblies', { params })
+        return normalizePagedResult(response.data)
     },
     getGeneralAssembly: async (id: string) => {
-        const items = JSON.parse(localStorage.getItem('mockGeneralAssemblies') || '[]')
-        return items.find((x: any) => x.id === id) || null
+        const response = await api.get<BackendDataResponse<any>>(`/GeneralAssemblies/${id}`)
+        return response.data.data
     },
     createGeneralAssembly: async (data: any) => {
-        const items = JSON.parse(localStorage.getItem('mockGeneralAssemblies') || '[]')
-        let siteName = 'Bilinmeyen Site'
-        try {
-            const response = await api.get(`/Sites/${data.siteId}`)
-            siteName = response.data?.data?.name || siteName
-        } catch (e) {
-            console.error('Could not fetch site name for mock', e)
-        }
-        const newItem = { ...data, id: Math.random().toString(36).substring(7), meetingDate: data.meetingDate, siteName, updatedAtUtc: new Date().toISOString() }
-        items.push(newItem)
-        localStorage.setItem('mockGeneralAssemblies', JSON.stringify(items))
-        return newItem
+        const response = await api.post<BackendDataResponse<any>>('/GeneralAssemblies', data)
+        return response.data.data
     },
     updateGeneralAssembly: async (id: string, data: any) => {
-        const items = JSON.parse(localStorage.getItem('mockGeneralAssemblies') || '[]')
-        const index = items.findIndex((x: any) => x.id === id)
-        if (index !== -1) {
-            items[index] = { ...items[index], ...data }
-            localStorage.setItem('mockGeneralAssemblies', JSON.stringify(items))
-            return items[index]
-        }
-        throw new Error('Not found')
+        const response = await api.put<BackendDataResponse<any>>(`/GeneralAssemblies/${id}`, data)
+        return response.data.data
     },
     archiveGeneralAssembly: async (id: string) => {
-        const items = JSON.parse(localStorage.getItem('mockGeneralAssemblies') || '[]')
-        const newItems = items.filter((x: any) => x.id !== id)
-        localStorage.setItem('mockGeneralAssemblies', JSON.stringify(newItems))
-        return true
+        const response = await api.delete(`/GeneralAssemblies/${id}`)
+        return response.data
     },
 }
 

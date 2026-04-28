@@ -25,6 +25,10 @@ import BlocksPage from '@/pages/property-management/BlocksPage'
 import UnitsPage from '@/pages/property-management/UnitsPage'
 import ResidentsPage from '@/pages/property-management/ResidentsPage'
 import GeneralAssembliesPage from '@/pages/property-management/GeneralAssembliesPage'
+import AssemblyListPage from '@/pages/property-management/general-assemblies/AssemblyListPage'
+import ManagementBoardPage from '@/pages/property-management/general-assemblies/ManagementBoardPage'
+import AuditBoardPage from '@/pages/property-management/general-assemblies/AuditBoardPage'
+import DecisionsPage from '@/pages/property-management/general-assemblies/DecisionsPage'
 
 import Error500 from '@/pages/error/Error500'
 import Error404 from '@/pages/error/Error404'
@@ -161,6 +165,10 @@ function App() {
           <Route path="/management/properties/units" element={<ProtectedRoute permission="Units.Read"><UnitsPage /></ProtectedRoute>} />
           <Route path="/management/properties/residents" element={<ProtectedRoute permission="Residents.Read"><ResidentsPage /></ProtectedRoute>} />
           <Route path="/management/properties/general-assemblies" element={<ProtectedRoute permission="Sites.Read"><GeneralAssembliesPage /></ProtectedRoute>} />
+          <Route path="/management/properties/general-assemblies/list" element={<ProtectedRoute permission="Sites.Read"><AssemblyListPage /></ProtectedRoute>} />
+          <Route path="/management/properties/general-assemblies/management-board" element={<ProtectedRoute permission="Sites.Read"><ManagementBoardPage /></ProtectedRoute>} />
+          <Route path="/management/properties/general-assemblies/audit-board" element={<ProtectedRoute permission="Sites.Read"><AuditBoardPage /></ProtectedRoute>} />
+          <Route path="/management/properties/general-assemblies/decisions" element={<ProtectedRoute permission="Sites.Read"><DecisionsPage /></ProtectedRoute>} />
           <Route path="/management/properties" element={<Navigate to="/management/properties/sites" replace />} />
 
           {/* Error Pages */}

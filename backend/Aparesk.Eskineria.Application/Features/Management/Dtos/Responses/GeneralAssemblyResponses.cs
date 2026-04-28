@@ -17,9 +17,15 @@ public class GeneralAssemblyListItemDto
 
 public class GeneralAssemblyDetailDto : GeneralAssemblyListItemDto
 {
-    public string? Notes { get; set; }
+    public List<GeneralAssemblyAgendaItemDto> AgendaItems { get; set; } = new();
     public List<GeneralAssemblyDecisionDto> Decisions { get; set; } = new();
     public List<GeneralAssemblyBoardMemberResponseDto> BoardMembers { get; set; } = new();
+}
+
+public class GeneralAssemblyAgendaItemDto
+{
+    public int Order { get; set; }
+    public string Description { get; set; } = string.Empty;
 }
 
 public class GeneralAssemblyBoardMemberResponseDto : GeneralAssemblyBoardMemberDto

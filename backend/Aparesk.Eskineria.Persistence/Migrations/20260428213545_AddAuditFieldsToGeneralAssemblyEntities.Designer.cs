@@ -4,6 +4,7 @@ using Aparesk.Eskineria.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Aparesk.Eskineria.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428213545_AddAuditFieldsToGeneralAssemblyEntities")]
+    partial class AddAuditFieldsToGeneralAssemblyEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -805,6 +808,10 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                     b.Property<DateOnly>("MeetingDate")
                         .HasColumnType("date");
 
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<Guid>("SiteId")
                         .HasColumnType("uniqueidentifier");
 
@@ -827,42 +834,6 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                     b.HasIndex("SiteId");
 
                     b.ToTable("GeneralAssemblies");
-                });
-
-            modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.GeneralAssemblyAgendaItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<Guid>("GeneralAssemblyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GeneralAssemblyId");
-
-                    b.ToTable("GeneralAssemblyAgendaItems", (string)null);
                 });
 
             modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.GeneralAssemblyDecision", b =>
@@ -1491,17 +1462,6 @@ namespace Aparesk.Eskineria.Persistence.Migrations
                     b.Navigation("Site");
                 });
 
-            modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.GeneralAssemblyAgendaItem", b =>
-                {
-                    b.HasOne("Aparesk.Eskineria.Domain.Entities.GeneralAssembly", "GeneralAssembly")
-                        .WithMany("AgendaItems")
-                        .HasForeignKey("GeneralAssemblyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GeneralAssembly");
-                });
-
             modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.GeneralAssemblyDecision", b =>
                 {
                     b.HasOne("Aparesk.Eskineria.Domain.Entities.GeneralAssembly", "GeneralAssembly")
@@ -1634,8 +1594,6 @@ namespace Aparesk.Eskineria.Persistence.Migrations
 
             modelBuilder.Entity("Aparesk.Eskineria.Domain.Entities.GeneralAssembly", b =>
                 {
-                    b.Navigation("AgendaItems");
-
                     b.Navigation("BoardMembers");
 
                     b.Navigation("Decisions");

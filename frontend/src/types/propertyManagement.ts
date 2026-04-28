@@ -223,6 +223,11 @@ export const BoardMemberType = {
 
 export type BoardMemberType = typeof BoardMemberType[keyof typeof BoardMemberType]
 
+export type GeneralAssemblyAgendaItem = {
+    order: number
+    description: string
+}
+
 export type GeneralAssemblyDecision = {
     id?: string
     decisionNumber: number
@@ -251,7 +256,7 @@ export type GeneralAssemblyListItem = {
 }
 
 export type GeneralAssemblyDetail = GeneralAssemblyListItem & {
-    notes?: string | null
+    agendaItems: GeneralAssemblyAgendaItem[]
     decisions: GeneralAssemblyDecision[]
     boardMembers: GeneralAssemblyBoardMember[]
 }
@@ -262,7 +267,7 @@ export type GeneralAssemblyPayload = {
     term: string
     type: MeetingType
     isCompleted: boolean
-    notes?: string | null
+    agendaItems: GeneralAssemblyAgendaItem[]
     decisions: GeneralAssemblyDecision[]
     boardMembers: GeneralAssemblyBoardMember[]
 }

@@ -55,6 +55,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBlockService, BlockService>();
         services.AddScoped<IUnitService, UnitService>();
         services.AddScoped<IResidentService, ResidentService>();
+        services.AddScoped<IGeneralAssemblyService, GeneralAssemblyService>();
         services.AddScoped<IProductService, ProductService>();
 
         return services;

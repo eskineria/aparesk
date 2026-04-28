@@ -14,7 +14,6 @@ public class GeneralAssemblyConfiguration : IEntityTypeConfiguration<GeneralAsse
         builder.Property(x => x.MeetingDate).IsRequired();
         builder.Property(x => x.Term).IsRequired().HasMaxLength(50);
         builder.Property(x => x.Type).IsRequired();
-        builder.Property(x => x.Notes).HasMaxLength(2000);
         
         builder.HasOne(x => x.Site)
             .WithMany()

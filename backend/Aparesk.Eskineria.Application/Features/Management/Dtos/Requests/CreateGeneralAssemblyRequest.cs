@@ -8,11 +8,17 @@ public class CreateGeneralAssemblyRequest
     public DateTime MeetingDate { get; set; }
     public string Term { get; set; } = string.Empty;
     public MeetingType Type { get; set; }
-    public string? Notes { get; set; }
     public bool IsCompleted { get; set; }
 
+    public List<GeneralAssemblyAgendaItemRequestDto> AgendaItems { get; set; } = new();
     public List<GeneralAssemblyDecisionDto> Decisions { get; set; } = new();
     public List<GeneralAssemblyBoardMemberDto> BoardMembers { get; set; } = new();
+}
+
+public class GeneralAssemblyAgendaItemRequestDto
+{
+    public int Order { get; set; }
+    public string Description { get; set; } = string.Empty;
 }
 
 public class UpdateGeneralAssemblyRequest : CreateGeneralAssemblyRequest

@@ -93,6 +93,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISiteBlockRepository, SiteBlockRepository>();
         services.AddScoped<IUnitRepository, UnitRepository>();
         services.AddScoped<ISiteResidentRepository, SiteResidentRepository>();
+        services.AddScoped<IGeneralAssemblyRepository, GeneralAssemblyRepository>();
+        services.AddScoped<IGeneralAssemblyDecisionRepository, GeneralAssemblyDecisionRepository>();
+        services.AddScoped<IBoardMemberRepository, BoardMemberRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
 
         return services;

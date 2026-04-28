@@ -1,11 +1,13 @@
+
 namespace Aparesk.Eskineria.Domain.Entities;
 
-public class GeneralAssemblyDecision
+public class GeneralAssemblyAgendaItem
 {
     public Guid Id { get; set; }
     public Guid GeneralAssemblyId { get; set; }
-    public int DecisionNumber { get; set; }
+    public int Order { get; set; }
     public string Description { get; set; } = string.Empty;
+    
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
     public Guid? CreatedByUserId { get; set; }

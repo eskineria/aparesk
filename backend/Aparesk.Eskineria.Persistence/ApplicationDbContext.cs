@@ -35,6 +35,7 @@ public class ApplicationDbContext : EskineriaIdentityDbContext
     public DbSet<SiteResident> SiteResidents { get; set; }
     public DbSet<HouseholdMember> HouseholdMembers { get; set; }
     public DbSet<GeneralAssembly> GeneralAssemblies { get; set; }
+    public DbSet<GeneralAssemblyAgendaItem> GeneralAssemblyAgendaItems { get; set; }
     public DbSet<GeneralAssemblyDecision> GeneralAssemblyDecisions { get; set; }
     public DbSet<BoardMember> BoardMembers { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
