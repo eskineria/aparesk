@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState, memo } from 'react'
 import { Button, Card, Col, Container, Form, Modal, Row, Table, Badge, CardHeader, CardFooter } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { LuPlus, LuSearch, LuPencil, LuTrash2, LuFileText, LuPrinter, LuMail, LuSettings2, LuFilter } from 'react-icons/lu'
+import { LuPlus, LuSearch, LuPencil, LuTrash2, LuFileText, LuPrinter, LuMail, LuSettings2, LuFilter, LuCalendar, LuMapPin, LuInfo } from 'react-icons/lu'
 import { showToast } from '@/utils/toast'
 import VerticalLayout from '@/layouts/VerticalLayout'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
 import TablePagination from '@/components/table/TablePagination'
+import ConfirmationModal from '@/components/ConfirmationModal'
 import PropertyManagementService from '@/services/propertyManagementService'
 import type { SiteListItem, GeneralAssemblyListItem, GeneralAssemblyPayload, GeneralAssemblyDetail } from '@/types/propertyManagement'
 import { MeetingType } from '@/types/propertyManagement'
@@ -22,6 +23,11 @@ const AssemblyListPage = () => {
     const [pageSize, setPageSize] = useState(10)
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedSiteId, setSelectedSiteId] = useState('')
+
+    // Confirmation Modal States
+    const [deleteConfirmShow, setDeleteConfirmShow] = useState(false)
+    const [idToDelete, setIdToDelete] = useState<string | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
 
     const initialForm: GeneralAssemblyPayload = {
         siteId: '',
@@ -117,14 +123,24 @@ const AssemblyListPage = () => {
         }
     }
 
-    const remove = async (id: string) => {
-        if (!window.confirm(t('common.areYouSure'))) return
+    const confirmRemove = (id: string) => {
+        setIdToDelete(id)
+        setDeleteConfirmShow(true)
+    }
+
+    const handleRemove = async () => {
+        if (!idToDelete) return
+        setIsDeleting(true)
         try {
-            await PropertyManagementService.archiveGeneralAssembly(id)
+            await PropertyManagementService.archiveGeneralAssembly(idToDelete)
             showToast(t('common.success'), 'success')
             fetchAssemblies()
+            setDeleteConfirmShow(false)
         } catch (error) {
             showToast(t('common.error'), 'danger')
+        } finally {
+            setIsDeleting(false)
+            setIdToDelete(null)
         }
     }
 
@@ -265,13 +281,14 @@ const AssemblyListPage = () => {
                     <Card.Body className="p-0 mt-2">
                         <div className="table-responsive">
                             <Table hover className="table-centered table-nowrap mb-0">
-                                <thead className="bg-light bg-opacity-50">
+                                <thead>
                                     <tr>
-                                        <th className="ps-4">Site</th>
-                                        <th>Dönem</th>
-                                        <th>Toplantı Tarihi</th>
-                                        <th>Tip</th>
-                                        <th className="text-end pe-4">İşlemler</th>
+                                        <th className="ps-4" style={{ width: '80px' }}>#</th>
+                                        <th>{t('property.generalAssembly.siteName')}</th>
+                                        <th>{t('property.generalAssembly.term')}</th>
+                                        <th>{t('property.generalAssembly.meetingDate')}</th>
+                                        <th>{t('property.generalAssembly.type')}</th>
+                                        <th className="text-end pe-4">{t('common.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -281,44 +298,73 @@ const AssemblyListPage = () => {
                                         <tr><td colSpan={6} className="text-center py-5 text-muted">Kayıt bulunamadı.</td></tr>
                                     ) : assemblies.map((a) => (
                                         <tr key={a.id}>
-                                            <td className="ps-4 fw-medium">{a.siteName}</td>
-                                            <td>{a.term}</td>
+                                            <td className="ps-4">
+                                                <div className="avatar-sm bg-light rounded d-flex align-items-center justify-content-center">
+                                                    <LuCalendar className="text-primary" />
+                                                </div>
+                                            </td>
+                                            <td className="fw-medium">{a.siteName}</td>
                                             <td>
-                                                <div>{formatDate(a.meetingDate)}</div>
-                                                {a.secondMeetingDate && (
-                                                    <small className="text-muted">2. Tarih: {formatDate(a.secondMeetingDate)}</small>
-                                                )}
+                                                <Badge bg="soft-info" className="text-info fs-12">
+                                                    {a.term}
+                                                </Badge>
                                             </td>
                                             <td>
-                                                <Badge bg={a.type === MeetingType.Ordinary ? 'info-subtle text-info' : 'danger-subtle text-danger'}>
-                                                    {a.type === MeetingType.Ordinary ? 'Olağan' : 'Olağanüstü'}
+                                                <div className="d-flex flex-column">
+                                                    <div className="d-flex align-items-center">
+                                                        <LuCalendar className="me-1 text-muted fs-12" />
+                                                        {formatDate(a.meetingDate)}
+                                                    </div>
+                                                    {a.secondMeetingDate && (
+                                                        <small className="text-muted fs-11">
+                                                            <LuInfo className="me-1" />
+                                                            {t('property.generalAssembly.secondDate')}: {formatDate(a.secondMeetingDate)}
+                                                        </small>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <Badge bg={a.type === MeetingType.Ordinary ? 'soft-primary' : 'soft-warning'} className="px-2 py-1">
+                                                    {a.type === MeetingType.Ordinary ? t('property.generalAssembly.typeOrdinary') : t('property.generalAssembly.typeExtraordinary')}
                                                 </Badge>
                                             </td>
                                             <td className="text-end pe-4">
                                                 <div className="d-flex justify-content-end gap-1">
                                                     <Button 
-                                                        variant="default" 
+                                                        variant="soft-info" 
                                                         size="sm" 
-                                                        title="Hazirun Cetveli" 
-                                                        className="btn-icon text-primary"
+                                                        title={t('property.generalAssembly.hazirunList')} 
+                                                        className="btn-icon"
                                                         onClick={() => openHazirun(a)}
                                                     >
-                                                        <LuFileText />
+                                                        <LuFileText size={16} />
                                                     </Button>
                                                     <Button 
-                                                        variant="default" 
+                                                        variant="soft-secondary" 
                                                         size="sm" 
-                                                        title="Davet Dilekçesi" 
-                                                        className="btn-icon text-info"
+                                                        title={t('property.generalAssembly.invitationLetter')} 
+                                                        className="btn-icon"
                                                         onClick={() => openInvitation(a)}
                                                     >
-                                                        <LuMail />
+                                                        <LuMail size={16} />
                                                     </Button>
-                                                    <Button variant="default" size="sm" onClick={() => openEdit(a.id)} className="btn-icon">
-                                                        <LuPencil />
+                                                    <Button 
+                                                        variant="soft-primary" 
+                                                        size="sm" 
+                                                        title={t('common.edit')}
+                                                        className="btn-icon"
+                                                        onClick={() => openEdit(a.id)}
+                                                    >
+                                                        <LuPencil size={16} />
                                                     </Button>
-                                                    <Button variant="default" size="sm" onClick={() => remove(a.id)} className="btn-icon text-danger">
-                                                        <LuTrash2 />
+                                                    <Button 
+                                                        variant="soft-danger" 
+                                                        size="sm" 
+                                                        title={t('common.delete')}
+                                                        className="btn-icon"
+                                                        onClick={() => confirmRemove(a.id)}
+                                                    >
+                                                        <LuTrash2 size={16} />
                                                     </Button>
                                                 </div>
                                             </td>
@@ -373,6 +419,17 @@ const AssemblyListPage = () => {
                 assembly={selectedAssembly}
                 detail={assemblyDetail}
                 loading={invitationLoading}
+            />
+
+            <ConfirmationModal
+                show={deleteConfirmShow}
+                onHide={() => setDeleteConfirmShow(false)}
+                onConfirm={handleRemove}
+                title={t('common.delete')}
+                message={t('common.areYouSure')}
+                variant="danger"
+                isLoading={isDeleting}
+                confirmText={t('common.delete')}
             />
 
             <style>{`

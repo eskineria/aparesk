@@ -173,8 +173,8 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
 
     public async Task<DataResponse<GeneralAssemblyDetailDto>> UpdateAsync(Guid id, UpdateGeneralAssemblyRequest request, CancellationToken cancellationToken = default)
     {
-        // 1. Load the main entity without tracking
-        var entity = await _assemblyRepository.Query(asNoTracking: true)
+        // 1. Load the main entity WITH tracking (No includes needed, ExecuteDelete handles cleanup)
+        var entity = await _assemblyRepository.Query(asNoTracking: false)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
             
         if (entity == null)
@@ -183,7 +183,7 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
         var context = (DbContext)((dynamic)_assemblyRepository).DbContext;
         var now = DateTime.UtcNow;
 
-        // 2. Clear old items using ExecuteDelete (Fast and safe)
+        // 2. Clean old items directly in DB (Fast and clean)
         await context.Set<GeneralAssemblyAgendaItem>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
         await context.Set<GeneralAssemblyDecision>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
         await context.Set<BoardMember>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
@@ -198,50 +198,60 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
         entity.UpdatedAtUtc = now;
         entity.UpdatedByUserId = _currentUserService.UserId;
 
-        // 4. Create and Add NEW items directly to their sets
-        var newAgendaItems = request.AgendaItems.Select(a => new GeneralAssemblyAgendaItem
-        {
-            Id = Guid.NewGuid(),
-            GeneralAssemblyId = id,
-            Order = a.Order,
-            Description = a.Description,
-            CreatedAtUtc = now,
-            UpdatedAtUtc = now,
-            CreatedByUserId = _currentUserService.UserId,
-            UpdatedByUserId = _currentUserService.UserId
-        }).ToList();
-        if (newAgendaItems.Any()) await context.Set<GeneralAssemblyAgendaItem>().AddRangeAsync(newAgendaItems, cancellationToken);
+        // 4. Clear internal collections in memory (to avoid tracking old deleted items)
+        entity.AgendaItems.Clear();
+        entity.Decisions.Clear();
+        entity.BoardMembers.Clear();
 
-        var newDecisions = request.Decisions.Select(d => new GeneralAssemblyDecision
+        // 5. Add NEW items to the collections (Since entity is tracked, EF will save these as new)
+        foreach (var a in request.AgendaItems)
         {
-            Id = Guid.NewGuid(),
-            GeneralAssemblyId = id,
-            DecisionNumber = d.DecisionNumber,
-            Description = d.Description,
-            CreatedAtUtc = now,
-            UpdatedAtUtc = now,
-            CreatedByUserId = _currentUserService.UserId,
-            UpdatedByUserId = _currentUserService.UserId
-        }).ToList();
-        if (newDecisions.Any()) await context.Set<GeneralAssemblyDecision>().AddRangeAsync(newDecisions, cancellationToken);
+            entity.AgendaItems.Add(new GeneralAssemblyAgendaItem
+            {
+                Id = Guid.NewGuid(),
+                GeneralAssemblyId = id,
+                Order = a.Order,
+                Description = a.Description,
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now,
+                CreatedByUserId = _currentUserService.UserId,
+                UpdatedByUserId = _currentUserService.UserId
+            });
+        }
 
-        var newBoardMembers = request.BoardMembers.Select(bm => new BoardMember
+        foreach (var d in request.Decisions)
         {
-            Id = Guid.NewGuid(),
-            GeneralAssemblyId = id,
-            ResidentId = bm.ResidentId,
-            BoardType = bm.BoardType,
-            MemberType = bm.MemberType,
-            Title = bm.Title,
-            CreatedAtUtc = now,
-            UpdatedAtUtc = now,
-            CreatedByUserId = _currentUserService.UserId,
-            UpdatedByUserId = _currentUserService.UserId
-        }).ToList();
-        if (newBoardMembers.Any()) await context.Set<BoardMember>().AddRangeAsync(newBoardMembers, cancellationToken);
+            entity.Decisions.Add(new GeneralAssemblyDecision
+            {
+                Id = Guid.NewGuid(),
+                GeneralAssemblyId = id,
+                DecisionNumber = d.DecisionNumber,
+                Description = d.Description,
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now,
+                CreatedByUserId = _currentUserService.UserId,
+                UpdatedByUserId = _currentUserService.UserId
+            });
+        }
 
-        // 5. Update main entity and Save
-        await _assemblyRepository.UpdateAsync(entity, cancellationToken);
+        foreach (var bm in request.BoardMembers)
+        {
+            entity.BoardMembers.Add(new BoardMember
+            {
+                Id = Guid.NewGuid(),
+                GeneralAssemblyId = id,
+                ResidentId = bm.ResidentId,
+                BoardType = bm.BoardType,
+                MemberType = bm.MemberType,
+                Title = bm.Title,
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now,
+                CreatedByUserId = _currentUserService.UserId,
+                UpdatedByUserId = _currentUserService.UserId
+            });
+        }
+
+        // 6. Atomic Save (EF will handle the new collection items automatically)
         await _assemblyRepository.SaveChangesAsync(cancellationToken);
 
         return await GetByIdAsync(id, cancellationToken);
