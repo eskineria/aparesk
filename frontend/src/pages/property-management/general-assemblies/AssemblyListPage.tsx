@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, memo } from 'react'
-import { Button, Card, Col, Container, Form, Modal, Row, Table, Badge, CardHeader, CardFooter } from 'react-bootstrap'
+import { Button, Card, Col, Container, Form, Modal, Row, Table, Badge, CardHeader, CardFooter, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { LuPlus, LuSearch, LuPencil, LuTrash2, LuFileText, LuPrinter, LuMail, LuSettings2, LuFilter, LuCalendar, LuMapPin, LuInfo } from 'react-icons/lu'
 import { showToast } from '@/utils/toast'
@@ -305,7 +305,7 @@ const AssemblyListPage = () => {
                                             </td>
                                             <td className="fw-medium">{a.siteName}</td>
                                             <td>
-                                                <Badge bg="soft-info" className="text-info fs-12">
+                                                <Badge bg="soft-info" className="text-info fs-12 px-2 py-1">
                                                     {a.term}
                                                 </Badge>
                                             </td>
@@ -324,48 +324,55 @@ const AssemblyListPage = () => {
                                                 </div>
                                             </td>
                                             <td>
-                                                <Badge bg={a.type === MeetingType.Ordinary ? 'soft-primary' : 'soft-warning'} className="px-2 py-1">
+                                                <Badge bg={a.type === MeetingType.Ordinary ? 'soft-info' : 'soft-danger'} className={`px-2 py-1 ${a.type === MeetingType.Ordinary ? 'text-info' : 'text-danger'}`}>
                                                     {a.type === MeetingType.Ordinary ? t('property.generalAssembly.typeOrdinary') : t('property.generalAssembly.typeExtraordinary')}
                                                 </Badge>
                                             </td>
                                             <td className="text-end pe-4">
                                                 <div className="d-flex justify-content-end gap-1">
-                                                    <Button 
-                                                        variant="soft-info" 
-                                                        size="sm" 
-                                                        title={t('property.generalAssembly.hazirunList')} 
-                                                        className="btn-icon"
-                                                        onClick={() => openHazirun(a)}
-                                                    >
-                                                        <LuFileText size={16} />
-                                                    </Button>
-                                                    <Button 
-                                                        variant="soft-secondary" 
-                                                        size="sm" 
-                                                        title={t('property.generalAssembly.invitationLetter')} 
-                                                        className="btn-icon"
-                                                        onClick={() => openInvitation(a)}
-                                                    >
-                                                        <LuMail size={16} />
-                                                    </Button>
-                                                    <Button 
-                                                        variant="soft-primary" 
-                                                        size="sm" 
-                                                        title={t('common.edit')}
-                                                        className="btn-icon"
-                                                        onClick={() => openEdit(a.id)}
-                                                    >
-                                                        <LuPencil size={16} />
-                                                    </Button>
-                                                    <Button 
-                                                        variant="soft-danger" 
-                                                        size="sm" 
-                                                        title={t('common.delete')}
-                                                        className="btn-icon"
-                                                        onClick={() => confirmRemove(a.id)}
-                                                    >
-                                                        <LuTrash2 size={16} />
-                                                    </Button>
+                                                    <OverlayTrigger placement="top" overlay={<Tooltip>{t('property.generalAssembly.hazirunList')}</Tooltip>}>
+                                                        <Button 
+                                                            variant="soft-info" 
+                                                            size="sm" 
+                                                            className="btn-icon"
+                                                            onClick={() => openHazirun(a)}
+                                                        >
+                                                            <LuFileText size={16} />
+                                                        </Button>
+                                                    </OverlayTrigger>
+
+                                                    <OverlayTrigger placement="top" overlay={<Tooltip>{t('property.generalAssembly.invitationLetter')}</Tooltip>}>
+                                                        <Button 
+                                                            variant="soft-secondary" 
+                                                            size="sm" 
+                                                            className="btn-icon"
+                                                            onClick={() => openInvitation(a)}
+                                                        >
+                                                            <LuMail size={16} />
+                                                        </Button>
+                                                    </OverlayTrigger>
+
+                                                    <OverlayTrigger placement="top" overlay={<Tooltip>{t('common.edit')}</Tooltip>}>
+                                                        <Button 
+                                                            variant="soft-primary" 
+                                                            size="sm" 
+                                                            className="btn-icon"
+                                                            onClick={() => openEdit(a.id)}
+                                                        >
+                                                            <LuPencil size={16} />
+                                                        </Button>
+                                                    </OverlayTrigger>
+
+                                                    <OverlayTrigger placement="top" overlay={<Tooltip>{t('common.delete')}</Tooltip>}>
+                                                        <Button 
+                                                            variant="soft-danger" 
+                                                            size="sm" 
+                                                            className="btn-icon"
+                                                            onClick={() => confirmRemove(a.id)}
+                                                        >
+                                                            <LuTrash2 size={16} />
+                                                        </Button>
+                                                    </OverlayTrigger>
                                                 </div>
                                             </td>
                                         </tr>
@@ -445,11 +452,13 @@ const AssemblyListPage = () => {
                     border: 1px solid transparent;
                 }
                 .btn-icon:hover {
-                    background-color: var(--bs-tertiary-bg) !important;
                     transform: translateY(-2px);
                     box-shadow: var(--bs-box-shadow-sm) !important;
-                    border-color: var(--bs-border-color);
                 }
+                .btn-soft-info:hover { background-color: rgba(var(--bs-info-rgb), 0.2) !important; color: var(--bs-info) !important; }
+                .btn-soft-secondary:hover { background-color: rgba(var(--bs-secondary-rgb), 0.2) !important; color: var(--bs-secondary) !important; }
+                .btn-soft-primary:hover { background-color: rgba(var(--bs-primary-rgb), 0.2) !important; color: var(--bs-primary) !important; }
+                .btn-soft-danger:hover { background-color: rgba(var(--bs-danger-rgb), 0.2) !important; color: var(--bs-danger) !important; }
                 .app-search .form-select {
                     background-image: none;
                 }
