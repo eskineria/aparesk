@@ -12,6 +12,7 @@ public class GeneralAssemblyConfiguration : IEntityTypeConfiguration<GeneralAsse
 
         builder.Property(x => x.SiteId).IsRequired();
         builder.Property(x => x.MeetingDate).IsRequired();
+        builder.Property(x => x.SecondMeetingDate);
         builder.Property(x => x.Term).IsRequired().HasMaxLength(50);
         builder.Property(x => x.Type).IsRequired();
         

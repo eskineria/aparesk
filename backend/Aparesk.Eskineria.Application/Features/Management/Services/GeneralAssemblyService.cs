@@ -50,8 +50,10 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
             Id = x.Id,
             SiteId = x.SiteId,
             SiteName = x.Site.Name,
-            MeetingDate = x.MeetingDate.ToDateTime(TimeOnly.MinValue),
+            MeetingDate = x.MeetingDate,
+            SecondMeetingDate = x.SecondMeetingDate,
             Term = x.Term,
+            Location = x.Location,
             Type = x.Type,
             IsCompleted = x.IsCompleted,
             UpdatedAtUtc = x.UpdatedAtUtc ?? x.CreatedAtUtc
@@ -68,6 +70,7 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
             .Include(x => x.Decisions)
             .Include(x => x.BoardMembers)
                 .ThenInclude(bm => bm.Resident)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (entity == null)
@@ -78,8 +81,10 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
             Id = entity.Id,
             SiteId = entity.SiteId,
             SiteName = entity.Site.Name,
-            MeetingDate = entity.MeetingDate.ToDateTime(TimeOnly.MinValue),
+            MeetingDate = entity.MeetingDate,
+            SecondMeetingDate = entity.SecondMeetingDate,
             Term = entity.Term,
+            Location = entity.Location,
             Type = entity.Type,
             IsCompleted = entity.IsCompleted,
             UpdatedAtUtc = entity.UpdatedAtUtc ?? entity.CreatedAtUtc,
@@ -116,8 +121,10 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
         {
             Id = Guid.NewGuid(),
             SiteId = request.SiteId,
-            MeetingDate = DateOnly.FromDateTime(request.MeetingDate),
+            MeetingDate = request.MeetingDate,
+            SecondMeetingDate = request.SecondMeetingDate,
             Term = request.Term,
+            Location = request.Location,
             Type = request.Type,
             IsCompleted = request.IsCompleted,
             CreatedAtUtc = now,
@@ -166,74 +173,75 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
 
     public async Task<DataResponse<GeneralAssemblyDetailDto>> UpdateAsync(Guid id, UpdateGeneralAssemblyRequest request, CancellationToken cancellationToken = default)
     {
-        var entity = await _assemblyRepository.Query()
-            .Include(x => x.Decisions)
-            .Include(x => x.BoardMembers)
+        // 1. Load the main entity without tracking
+        var entity = await _assemblyRepository.Query(asNoTracking: true)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
+            
         if (entity == null)
             throw new KeyNotFoundException("General assembly not found.");
 
+        var context = (DbContext)((dynamic)_assemblyRepository).DbContext;
         var now = DateTime.UtcNow;
-        entity.MeetingDate = DateOnly.FromDateTime(request.MeetingDate);
+
+        // 2. Clear old items using ExecuteDelete (Fast and safe)
+        await context.Set<GeneralAssemblyAgendaItem>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
+        await context.Set<GeneralAssemblyDecision>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
+        await context.Set<BoardMember>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
+
+        // 3. Update main entity properties
+        entity.MeetingDate = request.MeetingDate;
+        entity.SecondMeetingDate = request.SecondMeetingDate;
         entity.Term = request.Term;
+        entity.Location = request.Location;
         entity.Type = request.Type;
         entity.IsCompleted = request.IsCompleted;
         entity.UpdatedAtUtc = now;
         entity.UpdatedByUserId = _currentUserService.UserId;
 
-        // Clear existing related entities
-        entity.AgendaItems.Clear();
-        entity.Decisions.Clear();
-        entity.BoardMembers.Clear();
-
-        foreach (var a in request.AgendaItems)
+        // 4. Create and Add NEW items directly to their sets
+        var newAgendaItems = request.AgendaItems.Select(a => new GeneralAssemblyAgendaItem
         {
-            entity.AgendaItems.Add(new GeneralAssemblyAgendaItem
-            {
-                Id = Guid.NewGuid(),
-                GeneralAssemblyId = id,
-                Order = a.Order,
-                Description = a.Description,
-                CreatedAtUtc = now,
-                UpdatedAtUtc = now,
-                CreatedByUserId = _currentUserService.UserId,
-                UpdatedByUserId = _currentUserService.UserId
-            });
-        }
+            Id = Guid.NewGuid(),
+            GeneralAssemblyId = id,
+            Order = a.Order,
+            Description = a.Description,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            CreatedByUserId = _currentUserService.UserId,
+            UpdatedByUserId = _currentUserService.UserId
+        }).ToList();
+        if (newAgendaItems.Any()) await context.Set<GeneralAssemblyAgendaItem>().AddRangeAsync(newAgendaItems, cancellationToken);
 
-        foreach (var d in request.Decisions)
+        var newDecisions = request.Decisions.Select(d => new GeneralAssemblyDecision
         {
-            entity.Decisions.Add(new GeneralAssemblyDecision
-            {
-                Id = Guid.NewGuid(),
-                GeneralAssemblyId = id,
-                DecisionNumber = d.DecisionNumber,
-                Description = d.Description,
-                CreatedAtUtc = now,
-                UpdatedAtUtc = now,
-                CreatedByUserId = _currentUserService.UserId,
-                UpdatedByUserId = _currentUserService.UserId
-            });
-        }
+            Id = Guid.NewGuid(),
+            GeneralAssemblyId = id,
+            DecisionNumber = d.DecisionNumber,
+            Description = d.Description,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            CreatedByUserId = _currentUserService.UserId,
+            UpdatedByUserId = _currentUserService.UserId
+        }).ToList();
+        if (newDecisions.Any()) await context.Set<GeneralAssemblyDecision>().AddRangeAsync(newDecisions, cancellationToken);
 
-        foreach (var bm in request.BoardMembers)
+        var newBoardMembers = request.BoardMembers.Select(bm => new BoardMember
         {
-            entity.BoardMembers.Add(new BoardMember
-            {
-                Id = Guid.NewGuid(),
-                GeneralAssemblyId = id,
-                ResidentId = bm.ResidentId,
-                BoardType = bm.BoardType,
-                MemberType = bm.MemberType,
-                Title = bm.Title,
-                CreatedAtUtc = now,
-                UpdatedAtUtc = now,
-                CreatedByUserId = _currentUserService.UserId,
-                UpdatedByUserId = _currentUserService.UserId
-            });
-        }
+            Id = Guid.NewGuid(),
+            GeneralAssemblyId = id,
+            ResidentId = bm.ResidentId,
+            BoardType = bm.BoardType,
+            MemberType = bm.MemberType,
+            Title = bm.Title,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            CreatedByUserId = _currentUserService.UserId,
+            UpdatedByUserId = _currentUserService.UserId
+        }).ToList();
+        if (newBoardMembers.Any()) await context.Set<BoardMember>().AddRangeAsync(newBoardMembers, cancellationToken);
 
+        // 5. Update main entity and Save
+        await _assemblyRepository.UpdateAsync(entity, cancellationToken);
         await _assemblyRepository.SaveChangesAsync(cancellationToken);
 
         return await GetByIdAsync(id, cancellationToken);

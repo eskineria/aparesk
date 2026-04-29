@@ -6,7 +6,9 @@ public class CreateGeneralAssemblyRequest
 {
     public Guid SiteId { get; set; }
     public DateTime MeetingDate { get; set; }
+    public DateTime? SecondMeetingDate { get; set; }
     public string Term { get; set; } = string.Empty;
+    public string? Location { get; set; }
     public MeetingType Type { get; set; }
     public bool IsCompleted { get; set; }
 

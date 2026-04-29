@@ -249,7 +249,9 @@ export type GeneralAssemblyListItem = {
     siteId: string
     siteName: string
     meetingDate: string
+    secondMeetingDate?: string | null
     term: string
+    location?: string | null
     type: MeetingType
     isCompleted: boolean
     updatedAtUtc: string
@@ -264,7 +266,9 @@ export type GeneralAssemblyDetail = GeneralAssemblyListItem & {
 export type GeneralAssemblyPayload = {
     siteId: string
     meetingDate: string
+    secondMeetingDate?: string | null
     term: string
+    location?: string | null
     type: MeetingType
     isCompleted: boolean
     agendaItems: GeneralAssemblyAgendaItem[]

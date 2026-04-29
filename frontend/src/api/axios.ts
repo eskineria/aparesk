@@ -122,10 +122,8 @@ api.interceptors.response.use(
                 // Usually silent or specific handling in component
                 showToast(detail || title || i18n.t('auth.captcha.rateLimitExceeded'), 'warning');
             } else if (status === 500) {
-                // For critical server errors, redirect to 500 page
-                if (!window.location.pathname.includes('/error/500')) {
-                    window.location.href = '/error/500';
-                }
+                // Show toast instead of redirecting to error page to prevent session loss
+                showToast(detail || title || i18n.t('common.error'), 'error');
             } else if (status === 503) {
                 // Maintenance mode - only redirect if not already on the maintenance page
                 const isAuthPage = window.location.pathname.startsWith('/auth/');
@@ -140,10 +138,8 @@ api.interceptors.response.use(
             if (error.code === 'ECONNABORTED') {
                 showToast(i18n.t('auth.errors.requestTimeout') || i18n.t('common.networkError'), 'error');
             } else {
-                // Backend is down or network issue - redirect to 500 page
-                if (!window.location.pathname.includes('/error/500')) {
-                    window.location.href = '/error/500';
-                }
+                // Show toast for network issues instead of redirecting
+                showToast(i18n.t('common.networkError') || 'Network Error', 'error');
             }
         } else {
             showToast(error.message, 'error');

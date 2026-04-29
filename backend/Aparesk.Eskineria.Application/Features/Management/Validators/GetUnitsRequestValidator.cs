@@ -8,7 +8,7 @@ public sealed class GetUnitsRequestValidator : AbstractValidator<GetUnitsRequest
     public GetUnitsRequestValidator()
     {
         RuleFor(x => x.PageNumber).GreaterThan(0).WithMessage("GreaterThan");
-        RuleFor(x => x.PageSize).InclusiveBetween(1, 100).WithMessage("InclusiveBetween");
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 1000).WithMessage("InclusiveBetween");
         RuleFor(x => x.SearchTerm).MaximumLength(200).WithMessage("MaxLength");
     }
 }

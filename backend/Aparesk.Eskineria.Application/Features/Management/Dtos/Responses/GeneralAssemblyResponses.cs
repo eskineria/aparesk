@@ -9,7 +9,9 @@ public class GeneralAssemblyListItemDto
     public Guid SiteId { get; set; }
     public string SiteName { get; set; } = string.Empty;
     public DateTime MeetingDate { get; set; }
+    public DateTime? SecondMeetingDate { get; set; }
     public string Term { get; set; } = string.Empty;
+    public string? Location { get; set; }
     public MeetingType Type { get; set; }
     public bool IsCompleted { get; set; }
     public DateTime UpdatedAtUtc { get; set; }

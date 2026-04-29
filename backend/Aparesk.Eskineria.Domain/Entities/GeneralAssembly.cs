@@ -6,8 +6,10 @@ public class GeneralAssembly
 {
     public Guid Id { get; set; }
     public Guid SiteId { get; set; }
-    public DateOnly MeetingDate { get; set; }
+    public DateTime MeetingDate { get; set; }
+    public DateTime? SecondMeetingDate { get; set; }
     public string Term { get; set; } = string.Empty; // e.g. "2024-2025"
+    public string? Location { get; set; }
     public MeetingType Type { get; set; }
     public bool IsCompleted { get; set; }
     

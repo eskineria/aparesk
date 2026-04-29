@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState, memo } from 'react'
 import { Button, Card, Col, Container, Form, Modal, Row, Table, Badge, CardHeader, CardFooter } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { LuPlus, LuSearch, LuPencil, LuTrash2, LuFileText } from 'react-icons/lu'
+import { LuPlus, LuSearch, LuPencil, LuTrash2, LuFileText, LuPrinter, LuMail, LuSettings2, LuFilter } from 'react-icons/lu'
 import { showToast } from '@/utils/toast'
 import VerticalLayout from '@/layouts/VerticalLayout'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
 import TablePagination from '@/components/table/TablePagination'
 import PropertyManagementService from '@/services/propertyManagementService'
-import type { SiteListItem, GeneralAssemblyListItem, GeneralAssemblyPayload } from '@/types/propertyManagement'
+import type { SiteListItem, GeneralAssemblyListItem, GeneralAssemblyPayload, GeneralAssemblyDetail } from '@/types/propertyManagement'
 import { MeetingType } from '@/types/propertyManagement'
 
 const AssemblyListPage = () => {
@@ -21,11 +21,14 @@ const AssemblyListPage = () => {
     const [pageNumber, setPageNumber] = useState(1)
     const [pageSize, setPageSize] = useState(10)
     const [searchTerm, setSearchTerm] = useState('')
+    const [selectedSiteId, setSelectedSiteId] = useState('')
 
     const initialForm: GeneralAssemblyPayload = {
         siteId: '',
-        meetingDate: new Date().toISOString().split('T')[0],
+        meetingDate: new Date().toISOString().slice(0, 16),
+        secondMeetingDate: '',
         term: '',
+        location: '',
         type: MeetingType.Ordinary,
         isCompleted: false,
         agendaItems: [{ order: 1, description: 'Açılış ve yoklama' }],
@@ -35,13 +38,26 @@ const AssemblyListPage = () => {
     const [form, setForm] = useState<GeneralAssemblyPayload>(initialForm)
     const [hazirunShow, setHazirunShow] = useState(false)
     const [selectedHazirunSite, setSelectedHazirunSite] = useState<string | null>(null)
+    const [selectedHazirunDate, setSelectedHazirunDate] = useState<string>('')
+    const [selectedHazirunLocation, setSelectedHazirunLocation] = useState<string>('')
     const [hazirunResidents, setHazirunResidents] = useState<any[]>([])
     const [hazirunLoading, setHazirunLoading] = useState(false)
+    const [selectedHazirunAssembly, setSelectedHazirunAssembly] = useState<GeneralAssemblyListItem | null>(null)
+    
+    const [invitationShow, setInvitationShow] = useState(false)
+    const [selectedAssembly, setSelectedAssembly] = useState<GeneralAssemblyListItem | null>(null)
+    const [assemblyDetail, setAssemblyDetail] = useState<GeneralAssemblyDetail | null>(null)
+    const [invitationLoading, setInvitationLoading] = useState(false)
 
     const fetchAssemblies = useCallback(async () => {
         setLoading(true)
         try {
-            const result = await PropertyManagementService.getGeneralAssemblies({ pageNumber, pageSize, searchTerm })
+            const result = await PropertyManagementService.getGeneralAssemblies({ 
+                pageNumber, 
+                pageSize, 
+                searchTerm,
+                siteId: selectedSiteId || undefined
+            })
             setAssemblies(result.items)
             setTotalCount(result.totalCount)
         } catch (error) {
@@ -49,7 +65,7 @@ const AssemblyListPage = () => {
         } finally {
             setLoading(false)
         }
-    }, [pageNumber, pageSize, searchTerm, t])
+    }, [pageNumber, pageSize, searchTerm, selectedSiteId, t])
 
     const fetchSites = useCallback(async () => {
         try {
@@ -112,15 +128,52 @@ const AssemblyListPage = () => {
         }
     }
 
-    const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('tr-TR')
+    const formatDate = (dateStr: string) => {
+        if (!dateStr) return '-'
+        return new Date(dateStr).toLocaleString('tr-TR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    }
 
-    const openHazirun = async (siteId: string) => {
-        setSelectedHazirunSite(siteId)
+    const openHazirun = async (assembly: GeneralAssemblyListItem) => {
+        setSelectedHazirunAssembly(assembly)
+        setSelectedHazirunSite(assembly.siteId)
+        setSelectedHazirunDate(assembly.meetingDate)
+        setSelectedHazirunLocation(assembly.location || '')
         setHazirunShow(true)
         setHazirunLoading(true)
         try {
-            const result = await PropertyManagementService.getResidents({ siteId, pageNumber: 1, pageSize: 100 })
-            setHazirunResidents(result.items)
+            const [unitsResult, residentsResult] = await Promise.all([
+                PropertyManagementService.getUnits({ siteId: assembly.siteId, pageNumber: 1, pageSize: 100 }),
+                PropertyManagementService.getResidents({ siteId: assembly.siteId, type: 1, pageNumber: 1, pageSize: 100 })
+            ])
+
+            const merged = unitsResult.items.map(unit => {
+                const unitOwners = residentsResult.items.filter(r => r.unitId === unit.id)
+                return {
+                    blockName: unit.blockName,
+                    unitNumber: unit.number,
+                    landShare: unit.landShare,
+                    owners: unitOwners.length > 0 ? unitOwners : [{ firstName: '', lastName: '' }]
+                }
+            })
+
+            const displayData = merged.flatMap(item => 
+                item.owners.map(owner => ({
+                    blockName: item.blockName,
+                    unitNumber: item.unitNumber,
+                    landShare: item.landShare,
+                    firstName: owner.firstName,
+                    lastName: owner.lastName
+                }))
+            )
+
+            setHazirunResidents(displayData)
         } catch (error) {
             showToast(t('common.error'), 'danger')
         } finally {
@@ -128,42 +181,85 @@ const AssemblyListPage = () => {
         }
     }
 
+    const openInvitation = async (assembly: GeneralAssemblyListItem) => {
+        setAssemblyDetail(null)
+        setSelectedAssembly(assembly)
+        setInvitationShow(true)
+        setInvitationLoading(true)
+        try {
+            const data = await PropertyManagementService.getGeneralAssembly(assembly.id)
+            setAssemblyDetail(data)
+        } catch (error) {
+            showToast(t('common.error'), 'danger')
+        } finally {
+            setInvitationLoading(false)
+        }
+    }
+
     return (
         <VerticalLayout>
             <PageBreadcrumb title="Genel Kurul İşlemleri" subtitle="Genel Kurullar & Hazirun Cetveli" />
             <Container fluid>
-                <Card className="border-0 shadow-sm">
-                    <CardHeader className="bg-white border-bottom-0 pt-4 px-4">
-                        <div className="d-flex align-items-center justify-content-between">
-                            <h4 className="mb-0 fw-bold">Genel Kurul Listesi</h4>
-                            <div className="d-flex gap-2">
-                                <div className="d-flex align-items-center gap-2 me-3">
-                                    <span className="text-muted fs-sm">Göster:</span>
-                                    <Form.Select 
-                                        size="sm" 
-                                        value={pageSize} 
-                                        onChange={(e) => { setPageSize(Number(e.target.value)); setPageNumber(1); }}
-                                        style={{ width: '70px' }}
-                                    >
-                                        {[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}
-                                    </Form.Select>
-                                </div>
-                                <Button variant="primary" onClick={openCreate} className="d-flex align-items-center gap-2">
-                                    <LuPlus /> Yeni Genel Kurul
-                                </Button>
+                <Card className="border-0 shadow-sm overflow-hidden">
+                    <CardHeader className="border-bottom border-light d-flex flex-wrap align-items-center justify-content-between gap-3 p-3">
+                        <div className="d-flex flex-wrap gap-2 align-items-center flex-grow-1">
+                            {/* Search */}
+                            <div className="app-search" style={{ minWidth: '280px' }}>
+                                <input
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value)
+                                        setPageNumber(1)
+                                    }}
+                                    type="search"
+                                    className="form-control"
+                                    placeholder={t('common.search') + "..."}
+                                />
+                                <LuSearch className="app-search-icon text-muted" />
+                            </div>
+
+                            {/* Site Filter */}
+                            <div className="app-search">
+                                <Form.Select
+                                    value={selectedSiteId}
+                                    onChange={(e) => {
+                                        setSelectedSiteId(e.target.value)
+                                        setPageNumber(1)
+                                    }}
+                                    className="ps-4"
+                                    style={{ paddingLeft: '2.5rem' }}
+                                >
+                                    <option value="">Tüm Siteler</option>
+                                    {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                </Form.Select>
+                                <LuFilter className="app-search-icon text-muted" />
+                            </div>
+
+                            {/* Page Size */}
+                            <div className="app-search">
+                                <Form.Select
+                                    value={pageSize}
+                                    onChange={(e) => {
+                                        setPageSize(Number(e.target.value))
+                                        setPageNumber(1)
+                                    }}
+                                    className="ps-4"
+                                    style={{ paddingLeft: '2.5rem' }}
+                                >
+                                    {[10, 20, 50, 100].map((size) => (
+                                        <option key={size} value={size}>
+                                            {size} {t('identity.table.show')}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                                <LuSettings2 className="app-search-icon text-muted" />
                             </div>
                         </div>
-                        <div className="mt-3">
-                            <Form.Group className="position-relative">
-                                <LuSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
-                                <Form.Control 
-                                    type="text" 
-                                    placeholder="Dönem veya notlarda ara..." 
-                                    className="ps-5 bg-light border-0"
-                                    value={searchTerm}
-                                    onChange={(e) => { setSearchTerm(e.target.value); setPageNumber(1); }}
-                                />
-                            </Form.Group>
+
+                        <div className="d-flex gap-2">
+                            <Button variant="primary" className="px-3 shadow-sm" onClick={openCreate}>
+                                <LuPlus className="me-1" /> Yeni Genel Kurul
+                            </Button>
                         </div>
                     </CardHeader>
                     <Card.Body className="p-0 mt-2">
@@ -175,7 +271,6 @@ const AssemblyListPage = () => {
                                         <th>Dönem</th>
                                         <th>Toplantı Tarihi</th>
                                         <th>Tip</th>
-                                        <th>Durum</th>
                                         <th className="text-end pe-4">İşlemler</th>
                                     </tr>
                                 </thead>
@@ -188,34 +283,41 @@ const AssemblyListPage = () => {
                                         <tr key={a.id}>
                                             <td className="ps-4 fw-medium">{a.siteName}</td>
                                             <td>{a.term}</td>
-                                            <td>{formatDate(a.meetingDate)}</td>
+                                            <td>
+                                                <div>{formatDate(a.meetingDate)}</div>
+                                                {a.secondMeetingDate && (
+                                                    <small className="text-muted">2. Tarih: {formatDate(a.secondMeetingDate)}</small>
+                                                )}
+                                            </td>
                                             <td>
                                                 <Badge bg={a.type === MeetingType.Ordinary ? 'info-subtle text-info' : 'danger-subtle text-danger'}>
                                                     {a.type === MeetingType.Ordinary ? 'Olağan' : 'Olağanüstü'}
                                                 </Badge>
                                             </td>
-                                            <td>
-                                                {a.isCompleted ? (
-                                                    <Badge bg="success-subtle text-success">Tamamlandı</Badge>
-                                                ) : (
-                                                    <Badge bg="warning-subtle text-warning">Bekliyor</Badge>
-                                                )}
-                                            </td>
                                             <td className="text-end pe-4">
                                                 <div className="d-flex justify-content-end gap-1">
                                                     <Button 
-                                                        variant="light" 
+                                                        variant="default" 
                                                         size="sm" 
                                                         title="Hazirun Cetveli" 
                                                         className="btn-icon text-primary"
-                                                        onClick={() => openHazirun(a.siteId)}
+                                                        onClick={() => openHazirun(a)}
                                                     >
                                                         <LuFileText />
                                                     </Button>
-                                                    <Button variant="light" size="sm" onClick={() => openEdit(a.id)} className="btn-icon">
+                                                    <Button 
+                                                        variant="default" 
+                                                        size="sm" 
+                                                        title="Davet Dilekçesi" 
+                                                        className="btn-icon text-info"
+                                                        onClick={() => openInvitation(a)}
+                                                    >
+                                                        <LuMail />
+                                                    </Button>
+                                                    <Button variant="default" size="sm" onClick={() => openEdit(a.id)} className="btn-icon">
                                                         <LuPencil />
                                                     </Button>
-                                                    <Button variant="light" size="sm" onClick={() => remove(a.id)} className="btn-icon text-danger">
+                                                    <Button variant="default" size="sm" onClick={() => remove(a.id)} className="btn-icon text-danger">
                                                         <LuTrash2 />
                                                     </Button>
                                                 </div>
@@ -260,10 +362,45 @@ const AssemblyListPage = () => {
                 onHide={() => setHazirunShow(false)}
                 residents={hazirunResidents}
                 loading={hazirunLoading}
+                assembly={selectedHazirunAssembly}
+                currentDate={selectedHazirunDate}
+                setCurrentDate={setSelectedHazirunDate}
+            />
+
+            <InvitationModal 
+                show={invitationShow}
+                onHide={() => setInvitationShow(false)}
+                assembly={selectedAssembly}
+                detail={assemblyDetail}
+                loading={invitationLoading}
             />
 
             <style>{`
-                .btn-icon { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; }
+                .btn-icon {
+                    width: 32px;
+                    height: 32px;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                    background: transparent;
+                    border: 1px solid transparent;
+                }
+                .btn-icon:hover {
+                    background-color: var(--bs-tertiary-bg) !important;
+                    transform: translateY(-2px);
+                    box-shadow: var(--bs-box-shadow-sm) !important;
+                    border-color: var(--bs-border-color);
+                }
+                .app-search .form-select {
+                    background-image: none;
+                }
+                [data-bs-theme="dark"] .app-search .form-control,
+                [data-bs-theme="dark"] .app-search .form-select {
+                    background-color: var(--bs-tertiary-bg);
+                    border-color: var(--bs-border-color);
+                }
             `}</style>
         </VerticalLayout>
     )
@@ -304,14 +441,51 @@ const AssemblyModal = memo(({ show, onHide, form, setForm, sites, onSave, isEdit
                                 />
                             </Form.Group>
                         </Col>
+                        <Col md={12}>
+                            <Form.Group>
+                                <Form.Label>Toplantı Yeri (Adres/Salon)</Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    placeholder="Örn: Site Sosyal Tesisi veya Site Bahçesi" 
+                                    value={form.location || ''} 
+                                    onChange={(e) => setForm({ ...form, location: e.target.value })} 
+                                />
+                            </Form.Group>
+                        </Col>
                         <Col md={6}>
                             <Form.Group>
-                                <Form.Label>Toplantı Tarihi</Form.Label>
+                                <Form.Label>Toplantı Tarihi ve Saati</Form.Label>
                                 <Form.Control 
-                                    type="date" 
-                                    value={form.meetingDate.split('T')[0]} 
-                                    onChange={(e) => setForm({ ...form, meetingDate: e.target.value })} 
+                                    type="datetime-local" 
+                                    value={form.meetingDate?.slice(0, 16)} 
+                                    onChange={(e) => {
+                                        const dateVal = e.target.value;
+                                        if (!dateVal) return;
+                                        
+                                        const d = new Date(dateVal);
+                                        d.setDate(d.getDate() + 7);
+                                        
+                                        const pad = (n: number) => n.toString().padStart(2, '0');
+                                        const secondDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                                        
+                                        setForm({ 
+                                            ...form, 
+                                            meetingDate: dateVal,
+                                            secondMeetingDate: secondDate
+                                        });
+                                    }} 
                                 />
+                            </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                            <Form.Group>
+                                <Form.Label>2. Toplantı Tarihi (Çoğunluk Sağlanmazsa)</Form.Label>
+                                <Form.Control 
+                                    type="datetime-local" 
+                                    value={form.secondMeetingDate?.slice(0, 16)} 
+                                    onChange={(e) => setForm({ ...form, secondMeetingDate: e.target.value })} 
+                                />
+                                <Form.Text className="text-muted fs-xs">Genelde ilk toplantıdan 7-15 gün sonradır.</Form.Text>
                             </Form.Group>
                         </Col>
                         <Col md={6}>
@@ -325,14 +499,6 @@ const AssemblyModal = memo(({ show, onHide, form, setForm, sites, onSave, isEdit
                                     <option value={MeetingType.Extraordinary}>Olağanüstü</option>
                                 </Form.Select>
                             </Form.Group>
-                        </Col>
-                        <Col md={12}>
-                            <Form.Check 
-                                type="switch" 
-                                label="Toplantı Tamamlandı" 
-                                checked={form.isCompleted} 
-                                onChange={(e) => setForm({ ...form, isCompleted: e.target.checked })} 
-                            />
                         </Col>
                         <Col md={12}>
                             <div className="d-flex align-items-center justify-content-between mb-2">
@@ -391,28 +557,68 @@ const AssemblyModal = memo(({ show, onHide, form, setForm, sites, onSave, isEdit
     )
 })
 
-const HazirunModal = memo(({ show, onHide, residents, loading }: any) => {
+const HazirunModal = memo(({ show, onHide, residents, loading, assembly, currentDate, setCurrentDate }: any) => {
     const handlePrint = () => {
         window.print()
+    }
+
+    const formatDate = (dateStr: string) => {
+        if (!dateStr) return '-'
+        return new Date(dateStr).toLocaleString('tr-TR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
     }
 
     return (
         <Modal show={show} onHide={onHide} size="lg" centered scrollable>
             <Modal.Header closeButton className="print-hide">
-                <Modal.Title>Hazirun Cetveli (Katılım Listesi)</Modal.Title>
+                <div className="d-flex align-items-center justify-content-between w-100 me-2">
+                    <Modal.Title>Hazirun Cetveli</Modal.Title>
+                    {assembly?.secondMeetingDate && (
+                        <div className="d-flex gap-1 ms-auto">
+                            <Button 
+                                variant={currentDate === assembly.meetingDate ? 'primary' : 'outline-primary'} 
+                                size="sm"
+                                onClick={() => setCurrentDate(assembly.meetingDate)}
+                                className="px-3"
+                            >
+                                1. Toplantı
+                            </Button>
+                            <Button 
+                                variant={currentDate === assembly.secondMeetingDate ? 'primary' : 'outline-primary'} 
+                                size="sm"
+                                onClick={() => setCurrentDate(assembly.secondMeetingDate)}
+                                className="px-3"
+                            >
+                                2. Toplantı
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </Modal.Header>
             <Modal.Body className="p-0">
                 <div className="p-4 hazirun-print-area">
-                    <div className="text-center mb-4">
-                        <h3 className="fw-bold mb-1">HAZİRUN CETVELİ</h3>
-                        <p className="text-muted">Kat Malikleri Kurulu Toplantısı Katılım Listesi</p>
+                    <div className="text-center mb-4 border-bottom pb-3">
+                        <h3 className="fw-bold mb-1 text-uppercase">{assembly?.siteName} SİTESİ</h3>
+                        <h4 className="fw-bold mb-1">HAZİRUN CETVELİ</h4>
+                        <p className="text-muted mb-0">
+                            {currentDate === assembly?.secondMeetingDate ? '2. Toplantı' : '1. Toplantı'} Katılım Listesi
+                        </p>
+                        <div className="d-flex justify-content-center gap-4 mt-3 fs-sm fw-bold">
+                            <div>Tarih: {formatDate(currentDate)}</div>
+                            {assembly?.location && <div>Yer: {assembly.location}</div>}
+                        </div>
                     </div>
                     <Table bordered className="hazirun-table">
                         <thead className="bg-light">
                             <tr>
                                 <th style={{ width: '10%' }}>Blok/No</th>
-                                <th style={{ width: '30%' }}>Kat Maliki Adı Soyadı</th>
-                                <th style={{ width: '15%' }}>Arsa Payı</th>
+                                <th style={{ width: '45%' }}>Kat Maliki Adı Soyadı</th>
                                 <th style={{ width: '15%' }}>Temsilci</th>
                                 <th style={{ width: '30%' }}>İmza</th>
                             </tr>
@@ -426,17 +632,13 @@ const HazirunModal = memo(({ show, onHide, residents, loading }: any) => {
                                 <tr key={idx}>
                                     <td>{r.blockName} / {r.unitNumber}</td>
                                     <td>{r.firstName} {r.lastName}</td>
-                                    <td>-</td>
                                     <td></td>
                                     <td style={{ height: '40px' }}></td>
                                 </tr>
                             ))}
                         </tbody>
                     </Table>
-                    <div className="mt-4 fs-xs text-muted print-only text-center">
-                        Bu belge dijital ortamda Aparesk tarafından oluşturulmuştur.
                     </div>
-                </div>
             </Modal.Body>
             <Modal.Footer className="print-hide">
                 <Button variant="light" onClick={onHide}>Kapat</Button>
@@ -446,12 +648,219 @@ const HazirunModal = memo(({ show, onHide, residents, loading }: any) => {
             </Modal.Footer>
             <style>{`
                 @media print {
+                    @page { 
+                        size: auto;
+                        margin: 0 !important; 
+                    }
+                    body { 
+                        margin: 0 !important; 
+                        padding: 0 !important;
+                        background-color: white !important;
+                    }
                     .print-hide { display: none !important; }
-                    .modal-dialog { max-width: 100% !important; margin: 0 !important; }
-                    .modal-content { border: none !important; }
-                    .hazirun-print-area { padding: 0 !important; }
+                    .modal { position: absolute !important; left: 0 !important; top: 0 !important; margin: 0 !important; padding: 0 !important; min-height: 100% !important; width: 100% !important; }
+                    .modal-dialog { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+                    .modal-content { border: none !important; box-shadow: none !important; }
+                    .hazirun-print-area { 
+                        padding: 15mm !important; 
+                        color: black !important;
+                    }
                 }
-                .hazirun-table th, .hazirun-table td { padding: 8px; vertical-align: middle; border: 1px solid #dee2e6 !important; }
+                .hazirun-table th, .hazirun-table td { 
+                    padding: 4px 8px !important; 
+                    vertical-align: middle; 
+                    border: 1px solid #dee2e6 !important;
+                    font-size: 0.85rem;
+                }
+                .hazirun-print-area h3 { font-size: 1.25rem; }
+                .hazirun-print-area h4 { font-size: 1.1rem; }
+            `}</style>
+        </Modal>
+    )
+})
+
+const InvitationModal = memo(({ show, onHide, assembly, detail, loading }: any) => {
+    const handlePrint = () => {
+        window.print()
+    }
+
+    const formatDate = (dateStr: string) => {
+        if (!dateStr) return '-'
+        return new Date(dateStr).toLocaleString('tr-TR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    }
+
+    return (
+        <Modal show={show} onHide={onHide} size="lg" centered scrollable>
+            <Modal.Header closeButton className="print-hide">
+                <Modal.Title>Toplantı Davet Dilekçesi</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="p-0">
+                {loading ? (
+                    <div className="p-5 text-center">Yükleniyor...</div>
+                ) : assembly && (
+                    <div className="invitation-print-area fs-5">
+                        <div className="text-center mb-5">
+                            <h2 className="fw-bold mb-1">{assembly.siteName.toUpperCase()}</h2>
+                            <h4 className="fw-bold text-decoration-underline">SİTE YÖNETİM KURULU BAŞKANLIĞI'NDAN</h4>
+                        </div>
+
+                        <div className="mb-4">
+                            <p className="fw-bold">Sayın Kat Maliki,</p>
+                            <p style={{ textAlign: 'justify', lineHeight: '1.6' }}>
+                                Sitemizin <strong>{assembly.term}</strong> yılı Olağan Kat Malikleri Kurulu toplantısı, 
+                                aşağıda belirtilen gündem maddelerini görüşmek ve karara bağlamak üzere 
+                                <strong> {formatDate(assembly.meetingDate)}</strong> tarihinde, 
+                                <strong> {assembly.location || 'Site Toplantı Salonu'}</strong> adresinde yapılacaktır.
+                            </p>
+                            
+                            {assembly.secondMeetingDate && (
+                                <p style={{ textAlign: 'justify', lineHeight: '1.6' }}>
+                                    İlk toplantıda yasal çoğunluk sağlanamadığı takdirde, ikinci toplantı çoğunluk aranmaksızın 
+                                    <strong> {formatDate(assembly.secondMeetingDate)}</strong> tarihinde aynı yer ve saatte yapılacaktır.
+                                </p>
+                            )}
+
+                            <p style={{ textAlign: 'justify' }}>
+                                Tüm kat maliklerinin toplantıya bizzat katılmaları veya kendilerini bir vekil aracılığı ile temsil ettirmeleri önemle rica olunur.
+                            </p>
+                        </div>
+
+                        <div className="mb-4">
+                            <h5 className="fw-bold text-decoration-underline mb-3">TOPLANTI GÜNDEMİ:</h5>
+                            <ol>
+                                {detail?.agendaItems?.map((item: any, idx: number) => (
+                                    <li key={idx} className="mb-2">{item.description}</li>
+                                ))}
+                                {(!detail?.agendaItems || detail.agendaItems.length === 0) && (
+                                    <li>Gündem maddesi belirtilmemiştir.</li>
+                                )}
+                            </ol>
+                        </div>
+
+                        <div className="mt-5 pt-5 d-flex justify-content-end">
+                            <div className="text-center" style={{ minWidth: '200px' }}>
+                                <p className="mb-1">{new Date().toLocaleDateString('tr-TR')}</p>
+                                <p className="fw-bold mb-0">{assembly.siteName}</p>
+                                <p className="fw-bold">Yönetim Kurulu</p>
+                            </div>
+                        </div>
+                        
+                        {/* Page Break for Power of Attorney */}
+                        <div className="page-break"></div>
+
+                        <div className="invitation-print-area">
+                            {[1, 2].map((i) => (
+                                <div key={i} className={`vekaletname-box ${i === 1 ? 'border-bottom border-dashed' : ''}`} 
+                                     style={{ height: '148mm', padding: '10mm 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    
+                                    <div className="text-center mb-4">
+                                        <h4 className="fw-bold text-decoration-underline">VEKALETNAME</h4>
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <h5 className="fw-bold mb-3">{assembly.siteName.toUpperCase()} SİTE KAT MALİKLERİ KURULU BAŞKANLIĞI'NA</h5>
+                                        
+                                        <p style={{ textAlign: 'justify', lineHeight: '1.6', fontSize: '1rem' }}>
+                                            Sitemizin <strong>{formatDate(assembly.meetingDate)}</strong> tarihinde, 
+                                            bu toplantıda yasal çoğunluk sağlanamadığı takdirde 
+                                            <strong> {assembly.secondMeetingDate ? formatDate(assembly.secondMeetingDate) : '.../.../20...'}</strong> tarihinde 
+                                            yapılacak olan Olağan Kat Malikleri Kurulu Toplantısında, beni / bizi temsile, gündemdeki maddelerin görüşülüp karara bağlanması için oy kullanmaya 
+                                            vekil tayin ettim / ettik.
+                                        </p>
+                                    </div>
+
+                                    <div className="row g-0">
+                                        <div className="col-12">
+                                            <Table bordered size="sm" className="mb-0" style={{ fontSize: '1rem' }}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td className="fw-bold" style={{ width: '40%' }}>VEKİL ADI SOYADI</td>
+                                                        <td style={{ height: '35px' }}></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="fw-bold">KAT MALİKİ ADI SOYADI</td>
+                                                        <td style={{ height: '35px' }}></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="fw-bold">BLOK / DAİRE NO</td>
+                                                        <td style={{ height: '35px' }}></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="fw-bold">İMZA</td>
+                                                        <td style={{ height: '60px' }}></td>
+                                                    </tr>
+                                                </tbody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </Modal.Body>
+            <Modal.Footer className="print-hide">
+                <Button variant="light" onClick={onHide}>Kapat</Button>
+                <Button variant="primary" onClick={handlePrint} className="d-flex align-items-center gap-2">
+                    <LuPrinter /> Yazdır / PDF
+                </Button>
+            </Modal.Footer>
+            <style>{`
+                @media print {
+                    @page { 
+                        size: auto;
+                        margin: 0 !important; 
+                    }
+                    /* Hide everything in the app */
+                    #root, .navbar, .sidebar, .modal-backdrop, .modal-header, .modal-footer { 
+                        display: none !important; 
+                    }
+                    
+                    /* Reset modal to be a normal block element for printing */
+                    .modal { 
+                        position: static !important; 
+                        display: block !important; 
+                        width: 100% !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                    }
+                    .modal-dialog { 
+                        max-width: 100% !important; 
+                        margin: 0 !important; 
+                        padding: 0 !important; 
+                    }
+                    .modal-content { 
+                        border: none !important; 
+                        box-shadow: none !important; 
+                    }
+                    .modal-body { 
+                        padding: 0 !important;
+                        overflow: visible !important;
+                    }
+                    
+                    .invitation-print-area { 
+                        display: block !important;
+                        padding: 15mm !important; 
+                        color: black !important;
+                        background-color: white !important;
+                    }
+                    .page-break { 
+                        clear: both; 
+                        page-break-after: always; 
+                        break-after: page; 
+                    }
+                    .invitation-print-area fs-5 { font-size: 1.1rem !important; }
+                    body { background-color: white !important; }
+                }
+                .invitation-print-area { padding: 3rem; background-color: white; }
+                .print-only { display: none; }
             `}</style>
         </Modal>
     )
