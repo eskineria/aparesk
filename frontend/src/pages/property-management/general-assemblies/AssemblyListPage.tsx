@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, memo } from 'react'
 import { Button, Card, Col, Container, Form, Modal, Row, Table, Badge, CardHeader, CardFooter, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { LuPlus, LuSearch, LuPencil, LuTrash2, LuFileText, LuPrinter, LuMail, LuSettings2, LuFilter, LuCalendar, LuMapPin, LuInfo } from 'react-icons/lu'
+import { TbGavel } from 'react-icons/tb'
 import { showToast } from '@/utils/toast'
 import VerticalLayout from '@/layouts/VerticalLayout'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
@@ -23,6 +24,13 @@ const AssemblyListPage = () => {
     const [pageSize, setPageSize] = useState(10)
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedSiteId, setSelectedSiteId] = useState('')
+
+    // Generate years for Term selection (Last year, Current year, Next year)
+    const currentYear = new Date().getFullYear()
+    const years = [(currentYear + 1).toString(), currentYear.toString(), (currentYear - 1).toString()]
+
+    // Sorting assemblies by term descending
+    const sortedAssemblies = [...assemblies].sort((a, b) => b.term.localeCompare(a.term))
 
     // Confirmation Modal States
     const [deleteConfirmShow, setDeleteConfirmShow] = useState(false)
@@ -217,62 +225,60 @@ const AssemblyListPage = () => {
             <PageBreadcrumb title="Genel Kurul İşlemleri" subtitle="Genel Kurullar & Hazirun Cetveli" />
             <Container fluid>
                 <Card className="border-0 shadow-sm overflow-hidden">
-                    <CardHeader className="border-bottom border-light d-flex flex-wrap align-items-center justify-content-between gap-3 p-3">
-                        <div className="d-flex flex-wrap gap-2 align-items-center flex-grow-1">
-                            {/* Search */}
-                            <div className="app-search" style={{ minWidth: '280px' }}>
-                                <input
-                                    value={searchTerm}
-                                    onChange={(e) => {
-                                        setSearchTerm(e.target.value)
-                                        setPageNumber(1)
-                                    }}
-                                    type="search"
-                                    className="form-control"
-                                    placeholder={t('common.search') + "..."}
-                                />
-                                <LuSearch className="app-search-icon text-muted" />
+                    <CardHeader className="border-bottom border-light p-3">
+                        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 w-100">
+                            <div className="d-flex flex-wrap gap-2 align-items-center">
+                                {/* Search */}
+                                <div className="app-search" style={{ minWidth: '240px' }}>
+                                    <input
+                                        value={searchTerm}
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value)
+                                            setPageNumber(1)
+                                        }}
+                                        type="search"
+                                        className="form-control"
+                                        placeholder={t('common.search') + "..."}
+                                    />
+                                    <LuSearch className="app-search-icon text-muted" />
+                                </div>
+
+                                {/* Site Filter */}
+                                <div className="app-search" style={{ minWidth: '200px' }}>
+                                    <Form.Select
+                                        value={selectedSiteId}
+                                        onChange={(e) => {
+                                            setSelectedSiteId(e.target.value)
+                                            setPageNumber(1)
+                                        }}
+                                    >
+                                        <option value="">Tüm Siteler</option>
+                                        {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                    </Form.Select>
+                                    <LuFilter className="app-search-icon text-muted" />
+                                </div>
+
+                                {/* Page Size */}
+                                <div className="app-search" style={{ minWidth: '140px' }}>
+                                    <Form.Select
+                                        value={pageSize}
+                                        onChange={(e) => {
+                                            setPageSize(Number(e.target.value))
+                                            setPageNumber(1)
+                                        }}
+                                        className="ps-4"
+                                    >
+                                        {[10, 20, 50, 100].map((size) => (
+                                            <option key={size} value={size}>
+                                                {size} {t('identity.table.show')}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                    <LuSettings2 className="app-search-icon text-muted" />
+                                </div>
+                                <Button variant="outline-primary" onClick={fetchAssemblies}>{t('common.search')}</Button>
                             </div>
 
-                            {/* Site Filter */}
-                            <div className="app-search">
-                                <Form.Select
-                                    value={selectedSiteId}
-                                    onChange={(e) => {
-                                        setSelectedSiteId(e.target.value)
-                                        setPageNumber(1)
-                                    }}
-                                    className="ps-4"
-                                    style={{ paddingLeft: '2.5rem' }}
-                                >
-                                    <option value="">Tüm Siteler</option>
-                                    {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                </Form.Select>
-                                <LuFilter className="app-search-icon text-muted" />
-                            </div>
-
-                            {/* Page Size */}
-                            <div className="app-search">
-                                <Form.Select
-                                    value={pageSize}
-                                    onChange={(e) => {
-                                        setPageSize(Number(e.target.value))
-                                        setPageNumber(1)
-                                    }}
-                                    className="ps-4"
-                                    style={{ paddingLeft: '2.5rem' }}
-                                >
-                                    {[10, 20, 50, 100].map((size) => (
-                                        <option key={size} value={size}>
-                                            {size} {t('identity.table.show')}
-                                        </option>
-                                    ))}
-                                </Form.Select>
-                                <LuSettings2 className="app-search-icon text-muted" />
-                            </div>
-                        </div>
-
-                        <div className="d-flex gap-2">
                             <Button variant="primary" className="px-3 shadow-sm" onClick={openCreate}>
                                 <LuPlus className="me-1" /> Yeni Genel Kurul
                             </Button>
@@ -280,9 +286,9 @@ const AssemblyListPage = () => {
                     </CardHeader>
                     <Card.Body className="p-0 mt-2">
                         <div className="table-responsive">
-                            <Table hover className="table-centered table-nowrap mb-0">
-                                <thead>
-                                    <tr>
+                            <Table hover className="table-custom table-centered mb-0">
+                                <thead className="bg-light align-middle bg-opacity-25 thead-sm">
+                                    <tr className="text-uppercase fs-xxs">
                                         <th className="ps-4" style={{ width: '80px' }}>#</th>
                                         <th>{t('property.generalAssembly.siteName')}</th>
                                         <th>{t('property.generalAssembly.term')}</th>
@@ -293,14 +299,14 @@ const AssemblyListPage = () => {
                                 </thead>
                                 <tbody>
                                     {loading ? (
-                                        <tr><td colSpan={6} className="text-center py-5">Yükleniyor...</td></tr>
-                                    ) : assemblies.length === 0 ? (
-                                        <tr><td colSpan={6} className="text-center py-5 text-muted">Kayıt bulunamadı.</td></tr>
-                                    ) : assemblies.map((a) => (
+                                        <tr><td colSpan={7} className="text-center py-4">Yükleniyor...</td></tr>
+                                    ) : sortedAssemblies.length === 0 ? (
+                                        <tr><td colSpan={7} className="text-center py-4 text-muted">Kayıt bulunamadı.</td></tr>
+                                    ) : sortedAssemblies.map((a) => (
                                         <tr key={a.id}>
                                             <td className="ps-4">
                                                 <div className="avatar-sm bg-light rounded d-flex align-items-center justify-content-center">
-                                                    <LuCalendar className="text-primary" />
+                                                    <TbGavel className="text-primary fs-20" />
                                                 </div>
                                             </td>
                                             <td className="fw-medium">{a.siteName}</td>
@@ -440,28 +446,15 @@ const AssemblyListPage = () => {
             />
 
             <style>{`
-                .btn-icon {
-                    width: 32px;
-                    height: 32px;
-                    padding: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.2s;
-                    background: transparent;
-                    border: 1px solid transparent;
-                }
-                .btn-icon:hover {
-                    transform: translateY(-2px);
-                    box-shadow: var(--bs-box-shadow-sm) !important;
-                }
-                .btn-soft-info:hover { background-color: rgba(var(--bs-info-rgb), 0.2) !important; color: var(--bs-info) !important; }
-                .btn-soft-secondary:hover { background-color: rgba(var(--bs-secondary-rgb), 0.2) !important; color: var(--bs-secondary) !important; }
-                .btn-soft-primary:hover { background-color: rgba(var(--bs-primary-rgb), 0.2) !important; color: var(--bs-primary) !important; }
-                .btn-soft-danger:hover { background-color: rgba(var(--bs-danger-rgb), 0.2) !important; color: var(--bs-danger) !important; }
-                .app-search .form-select {
-                    background-image: none;
-                }
+                .app-search { position: relative; }
+                .app-search .form-control, .app-search .form-select { padding-left: 2.5rem !important; border-radius: 4px; }
+                .app-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; z-index: 1; }
+                .btn-icon { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: transparent; border: 1px solid transparent; }
+                .btn-icon:hover { background-color: var(--bs-tertiary-bg) !important; transform: translateY(-2px); box-shadow: var(--bs-box-shadow-sm) !important; border-color: var(--bs-border-color); }
+                .table-custom tr:hover { background-color: rgba(var(--bs-primary-rgb), 0.05); }
+                .thead-sm th { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; font-weight: 600; color: var(--bs-secondary-color); }
+                .fs-xxs { font-size: 0.7rem !important; letter-spacing: 0.02em; }
+                
                 [data-bs-theme="dark"] .app-search .form-control,
                 [data-bs-theme="dark"] .app-search .form-select {
                     background-color: var(--bs-tertiary-bg);
@@ -498,13 +491,16 @@ const AssemblyModal = memo(({ show, onHide, form, setForm, sites, onSave, isEdit
                         </Col>
                         <Col md={6}>
                             <Form.Group>
-                                <Form.Label>Dönem</Form.Label>
-                                <Form.Control 
-                                    type="text" 
-                                    placeholder="Örn: 2024-2025" 
+                                <Form.Label>Dönem (Yıl)</Form.Label>
+                                <Form.Select 
                                     value={form.term} 
                                     onChange={(e) => setForm({ ...form, term: e.target.value })} 
-                                />
+                                >
+                                    <option value="">Yıl Seçiniz...</option>
+                                    {[new Date().getFullYear() + 1, new Date().getFullYear(), new Date().getFullYear() - 1].map(year => (
+                                        <option key={year} value={year.toString()}>{year}</option>
+                                    ))}
+                                </Form.Select>
                             </Form.Group>
                         </Col>
                         <Col md={12}>

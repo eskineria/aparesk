@@ -41,4 +41,5 @@ public class GeneralAssemblyBoardMemberDto
     public BoardType BoardType { get; set; }
     public BoardMemberType MemberType { get; set; }
     public string? Title { get; set; }
+    public bool IsActive { get; set; } = true;
 }

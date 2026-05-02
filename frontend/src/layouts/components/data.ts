@@ -14,6 +14,7 @@ import {
     TbBuildingCommunity,
     TbBuilding,
     TbLayoutGrid,
+    TbGavel,
 } from 'react-icons/tb'
 import {
     LuCircleGauge,
@@ -63,7 +64,7 @@ export const menuItems: MenuItemType[] = [
     { key: 'blocks', label: '', labelKey: 'propertyManagement.tabs.blocks', url: '/management/properties/blocks', permission: 'Blocks.Read', icon: TbBuilding },
     { key: 'units', label: '', labelKey: 'propertyManagement.tabs.units', url: '/management/properties/units', permission: 'Units.Read', icon: TbLayoutGrid },
     { key: 'residents', label: '', labelKey: 'propertyManagement.tabs.residents', url: '/management/properties/residents', permission: 'Residents.Read', icon: TbUsers },
-    { key: 'general-assemblies', label: '', labelKey: 'propertyManagement.tabs.generalAssemblies', url: '/management/properties/general-assemblies', permission: 'Sites.Read', icon: TbUsers },
+    { key: 'general-assemblies', label: '', labelKey: 'propertyManagement.tabs.generalAssemblies', url: '/management/properties/general-assemblies', permission: 'Sites.Read', icon: TbGavel },
     { key: 'apps', label: '', labelKey: 'menu.apps', isTitle: true },
     {
         key: 'localization-mgmt',

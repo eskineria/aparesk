@@ -240,6 +240,7 @@ export type GeneralAssemblyBoardMember = {
     boardType: BoardType
     memberType: BoardMemberType
     title?: string | null
+    isActive?: boolean
     // View fields
     residentName?: string
 }

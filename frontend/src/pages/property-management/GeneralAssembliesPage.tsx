@@ -1,6 +1,7 @@
 import { Col, Container, Row, Card } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { LuUsers, LuUserPlus, LuShield, LuBookOpen } from 'react-icons/lu'
+import { LuUserPlus, LuShield, LuBookOpen } from 'react-icons/lu'
+import { TbGavel } from 'react-icons/tb'
 import { useNavigate } from 'react-router-dom'
 import VerticalLayout from '@/layouts/VerticalLayout'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
@@ -13,7 +14,7 @@ const GeneralAssembliesDashboard = () => {
         {
             title: 'Genel Kurullar & Hazirun Cetveli',
             description: 'Genel kurul tanımlamaları, tarih ve dönem belirleme ile hazirun listesi.',
-            icon: <LuUsers size={40} className="text-primary mb-3" />,
+            icon: <TbGavel size={40} className="text-primary mb-3" />,
             color: 'primary',
             path: '/management/properties/general-assemblies/list'
         },

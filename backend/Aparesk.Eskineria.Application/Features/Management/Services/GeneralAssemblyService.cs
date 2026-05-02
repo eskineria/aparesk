@@ -5,6 +5,7 @@ using Aparesk.Eskineria.Core.Auth.Abstractions;
 using Aparesk.Eskineria.Core.Repository.Paging;
 using Aparesk.Eskineria.Core.Shared.Response;
 using Aparesk.Eskineria.Domain.Entities;
+using Aparesk.Eskineria.Domain.Enums;
 using Aparesk.Eskineria.Persistence.Features.Management.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,6 +71,7 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
             .Include(x => x.Decisions)
             .Include(x => x.BoardMembers)
                 .ThenInclude(bm => bm.Resident)
+                    .ThenInclude(r => r.Unit)
             .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
@@ -106,8 +108,9 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
                 BoardType = bm.BoardType,
                 MemberType = bm.MemberType,
                 Title = bm.Title,
-                ResidentName = $"{bm.Resident.FirstName} {bm.Resident.LastName}",
-                UnitNumber = bm.Resident.UnitId.HasValue ? GetUnitNumber(bm.Resident.UnitId.Value) : null
+                IsActive = bm.IsActive,
+                ResidentName = bm.Resident != null ? $"{bm.Resident.FirstName} {bm.Resident.LastName}" : "Bilinmeyen Sakin",
+                UnitNumber = bm.Resident?.Unit?.Number
             }).ToList()
         };
 
@@ -158,6 +161,7 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
                 BoardType = bm.BoardType,
                 MemberType = bm.MemberType,
                 Title = bm.Title,
+                IsActive = bm.IsActive,
                 CreatedAtUtc = now,
                 UpdatedAtUtc = now,
                 CreatedByUserId = _currentUserService.UserId,
@@ -173,40 +177,62 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
 
     public async Task<DataResponse<GeneralAssemblyDetailDto>> UpdateAsync(Guid id, UpdateGeneralAssemblyRequest request, CancellationToken cancellationToken = default)
     {
-        // 1. Load the main entity WITH tracking (No includes needed, ExecuteDelete handles cleanup)
-        var entity = await _assemblyRepository.Query(asNoTracking: false)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-            
-        if (entity == null)
+        var assembly = await _assemblyRepository.Query()
+            .Where(x => x.Id == id)
+            .Select(x => new { x.SiteId })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (assembly == null)
             throw new KeyNotFoundException("General assembly not found.");
 
-        var context = (DbContext)((dynamic)_assemblyRepository).DbContext;
+        var agendaItems = request.AgendaItems ?? new();
+        var decisions = request.Decisions ?? new();
+        var boardMembers = request.BoardMembers ?? new();
+
+        await EnsureBoardMembersBelongToSiteAsync(assembly.SiteId, boardMembers, cancellationToken);
+
+        var context = GetDbContext();
+        var managementBoardUpdateMode = await EnsureManagementBoardUpdateIsAllowedAsync(context, id, boardMembers, cancellationToken);
+        var shouldPreserveManagementBoard = managementBoardUpdateMode == ManagementBoardUpdateMode.LockedUnchanged;
+        var boardMembersToPersist = (shouldPreserveManagementBoard
+                ? boardMembers.Where(x => x.BoardType != BoardType.ManagementBoard)
+                : boardMembers)
+            .ToList();
+
         var now = DateTime.UtcNow;
+        var currentUserId = _currentUserService.UserId;
 
-        // 2. Clean old items directly in DB (Fast and clean)
-        await context.Set<GeneralAssemblyAgendaItem>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
-        await context.Set<GeneralAssemblyDecision>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
-        await context.Set<BoardMember>().Where(x => x.GeneralAssemblyId == id).ExecuteDeleteAsync(cancellationToken);
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
 
-        // 3. Update main entity properties
-        entity.MeetingDate = request.MeetingDate;
-        entity.SecondMeetingDate = request.SecondMeetingDate;
-        entity.Term = request.Term;
-        entity.Location = request.Location;
-        entity.Type = request.Type;
-        entity.IsCompleted = request.IsCompleted;
-        entity.UpdatedAtUtc = now;
-        entity.UpdatedByUserId = _currentUserService.UserId;
+        await context.Set<GeneralAssembly>()
+            .Where(x => x.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.MeetingDate, request.MeetingDate)
+                .SetProperty(x => x.SecondMeetingDate, request.SecondMeetingDate)
+                .SetProperty(x => x.Term, request.Term)
+                .SetProperty(x => x.Location, request.Location)
+                .SetProperty(x => x.Type, request.Type)
+                .SetProperty(x => x.IsCompleted, request.IsCompleted)
+                .SetProperty(x => x.UpdatedAtUtc, now)
+                .SetProperty(x => x.UpdatedByUserId, currentUserId),
+                cancellationToken);
 
-        // 4. Clear internal collections in memory (to avoid tracking old deleted items)
-        entity.AgendaItems.Clear();
-        entity.Decisions.Clear();
-        entity.BoardMembers.Clear();
+        await context.Set<GeneralAssemblyAgendaItem>()
+            .Where(x => x.GeneralAssemblyId == id)
+            .ExecuteDeleteAsync(cancellationToken);
 
-        // 5. Add NEW items to the collections (Since entity is tracked, EF will save these as new)
-        foreach (var a in request.AgendaItems)
+        await context.Set<GeneralAssemblyDecision>()
+            .Where(x => x.GeneralAssemblyId == id)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        await context.Set<BoardMember>()
+            .Where(x => x.GeneralAssemblyId == id)
+            .Where(x => !shouldPreserveManagementBoard || x.BoardType != BoardType.ManagementBoard)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        if (agendaItems.Count > 0)
         {
-            entity.AgendaItems.Add(new GeneralAssemblyAgendaItem
+            await context.Set<GeneralAssemblyAgendaItem>().AddRangeAsync(agendaItems.Select(a => new GeneralAssemblyAgendaItem
             {
                 Id = Guid.NewGuid(),
                 GeneralAssemblyId = id,
@@ -214,14 +240,14 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
                 Description = a.Description,
                 CreatedAtUtc = now,
                 UpdatedAtUtc = now,
-                CreatedByUserId = _currentUserService.UserId,
-                UpdatedByUserId = _currentUserService.UserId
-            });
+                CreatedByUserId = currentUserId,
+                UpdatedByUserId = currentUserId
+            }), cancellationToken);
         }
 
-        foreach (var d in request.Decisions)
+        if (decisions.Count > 0)
         {
-            entity.Decisions.Add(new GeneralAssemblyDecision
+            await context.Set<GeneralAssemblyDecision>().AddRangeAsync(decisions.Select(d => new GeneralAssemblyDecision
             {
                 Id = Guid.NewGuid(),
                 GeneralAssemblyId = id,
@@ -229,14 +255,14 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
                 Description = d.Description,
                 CreatedAtUtc = now,
                 UpdatedAtUtc = now,
-                CreatedByUserId = _currentUserService.UserId,
-                UpdatedByUserId = _currentUserService.UserId
-            });
+                CreatedByUserId = currentUserId,
+                UpdatedByUserId = currentUserId
+            }), cancellationToken);
         }
 
-        foreach (var bm in request.BoardMembers)
+        if (boardMembersToPersist.Count > 0)
         {
-            entity.BoardMembers.Add(new BoardMember
+            await context.Set<BoardMember>().AddRangeAsync(boardMembersToPersist.Select(bm => new BoardMember
             {
                 Id = Guid.NewGuid(),
                 GeneralAssemblyId = id,
@@ -244,15 +270,16 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
                 BoardType = bm.BoardType,
                 MemberType = bm.MemberType,
                 Title = bm.Title,
+                IsActive = bm.IsActive,
                 CreatedAtUtc = now,
                 UpdatedAtUtc = now,
-                CreatedByUserId = _currentUserService.UserId,
-                UpdatedByUserId = _currentUserService.UserId
-            });
+                CreatedByUserId = currentUserId,
+                UpdatedByUserId = currentUserId
+            }), cancellationToken);
         }
 
-        // 6. Atomic Save (EF will handle the new collection items automatically)
-        await _assemblyRepository.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return await GetByIdAsync(id, cancellationToken);
     }
@@ -269,11 +296,155 @@ public sealed class GeneralAssemblyService : IGeneralAssemblyService
         return Response.Succeed("General assembly deleted successfully.");
     }
 
-    private string? GetUnitNumber(Guid unitId)
+    private async Task EnsureBoardMembersBelongToSiteAsync(
+        Guid siteId,
+        IReadOnlyCollection<GeneralAssemblyBoardMemberDto> boardMembers,
+        CancellationToken cancellationToken)
     {
-        // Simple helper to avoid complex includes for now
-        var context = ((dynamic)_assemblyRepository).DbContext;
-        var unit = (context as DbContext).Set<Unit>().Find(unitId);
-        return unit?.Number;
+        if (boardMembers.Any(x => x.ResidentId == Guid.Empty))
+        {
+            throw new ArgumentException("Kurul üyeleri için kişi seçilmelidir.");
+        }
+
+        var residentIds = boardMembers
+            .Select(x => x.ResidentId)
+            .Distinct()
+            .ToArray();
+
+        if (residentIds.Length == 0)
+        {
+            return;
+        }
+
+        var validResidentCount = await _residentRepository.Query()
+            .CountAsync(x => residentIds.Contains(x.Id) && x.SiteId == siteId && !x.IsArchived, cancellationToken);
+
+        if (validResidentCount != residentIds.Length)
+        {
+            throw new ArgumentException("Seçilen kurul üyelerinden bazıları bu siteye ait değil veya geçerli değil.");
+        }
+    }
+
+    private static async Task<ManagementBoardUpdateMode> EnsureManagementBoardUpdateIsAllowedAsync(
+        DbContext context,
+        Guid generalAssemblyId,
+        IReadOnlyCollection<GeneralAssemblyBoardMemberDto> incomingBoardMembers,
+        CancellationToken cancellationToken)
+    {
+        var existingRows = await context.Set<BoardMember>()
+            .AsNoTracking()
+            .Where(x => x.GeneralAssemblyId == generalAssemblyId && x.BoardType == BoardType.ManagementBoard)
+            .Select(x => new { x.ResidentId, x.MemberType, x.Title, x.IsActive })
+            .ToListAsync(cancellationToken);
+
+        if (existingRows.Count == 0)
+        {
+            return ManagementBoardUpdateMode.NotLocked;
+        }
+
+        var existingSignatures = NormalizeManagementBoardSignatures(existingRows.Select(x =>
+            new BoardMemberSignature(x.ResidentId, x.MemberType, NormalizeTitle(x.Title), x.IsActive)));
+
+        var incomingSignatures = NormalizeManagementBoardSignatures(incomingBoardMembers
+            .Where(x => x.BoardType == BoardType.ManagementBoard)
+            .Select(x => new BoardMemberSignature(x.ResidentId, x.MemberType, NormalizeTitle(x.Title), x.IsActive)));
+
+        if (existingSignatures.SequenceEqual(incomingSignatures))
+        {
+            return ManagementBoardUpdateMode.LockedUnchanged;
+        }
+
+        if (IsSingleSubstitutePromotion(existingSignatures, incomingSignatures))
+        {
+            return ManagementBoardUpdateMode.SubstitutePromotion;
+        }
+
+        throw new ArgumentException("Yönetim kurulu onaylandıktan sonra yalnızca asil üye istifasında bir yedek üye asil olarak atanabilir.");
+    }
+
+    private static BoardMemberSignature[] NormalizeManagementBoardSignatures(IEnumerable<BoardMemberSignature> signatures)
+    {
+        return signatures
+            .OrderBy(x => x.ResidentId)
+            .ThenBy(x => (int)x.MemberType)
+            .ThenBy(x => x.Title, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static bool IsSingleSubstitutePromotion(
+        IReadOnlyCollection<BoardMemberSignature> existingSignatures,
+        IReadOnlyCollection<BoardMemberSignature> incomingSignatures)
+    {
+        if (incomingSignatures.Count != existingSignatures.Count)
+        {
+            return false;
+        }
+
+        var existingByResident = existingSignatures
+            .GroupBy(x => x.ResidentId)
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        var incomingByResident = incomingSignatures
+            .GroupBy(x => x.ResidentId)
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        if (existingByResident.Any(x => x.Value.Count != 1) || incomingByResident.Any(x => x.Value.Count != 1))
+        {
+            return false;
+        }
+
+        if (incomingByResident.Keys.Any(x => !existingByResident.ContainsKey(x)))
+        {
+            return false;
+        }
+
+        var changedMembers = existingByResident
+            .Where(x => incomingByResident.ContainsKey(x.Key))
+            .Select(x => new
+            {
+                Existing = x.Value[0],
+                Incoming = incomingByResident[x.Key][0]
+            })
+            .Where(x => x.Existing != x.Incoming)
+            .ToArray();
+
+        if (changedMembers.Length != 2)
+        {
+            return false;
+        }
+
+        var resignedMember = changedMembers.FirstOrDefault(x => x.Existing.IsActive && !x.Incoming.IsActive);
+        var promotedMember = changedMembers.FirstOrDefault(x => x.Existing.MemberType == BoardMemberType.Substitute && x.Incoming.MemberType == BoardMemberType.Principal);
+
+        if (resignedMember == null || promotedMember == null)
+        {
+            return false;
+        }
+
+        if (resignedMember.Existing.MemberType != BoardMemberType.Principal)
+        {
+            return false;
+        }
+
+        return !promotedMember.Incoming.Title.Equals("Yedek Üye", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeTitle(string? title)
+    {
+        return (title ?? string.Empty).Trim();
+    }
+
+    private DbContext GetDbContext()
+    {
+        return ((dynamic)_assemblyRepository).DbContext;
+    }
+
+    private sealed record BoardMemberSignature(Guid ResidentId, BoardMemberType MemberType, string Title, bool IsActive);
+
+    private enum ManagementBoardUpdateMode
+    {
+        NotLocked,
+        LockedUnchanged,
+        SubstitutePromotion
     }
 }

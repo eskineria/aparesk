@@ -10,6 +10,7 @@ public class BoardMember
     public BoardType BoardType { get; set; }
     public BoardMemberType MemberType { get; set; }
     public string? Title { get; set; } 
+    public bool IsActive { get; set; } = true;
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
     public Guid? CreatedByUserId { get; set; }
